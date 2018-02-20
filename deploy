@@ -8,6 +8,15 @@ set 'foo bar' '123'
 cli command group
 */
 
+if (isset($_SERVER['argv'][1])) {
+	if ($_SERVER['argv'][1] == 'self_update') {
+		passthru('rm -fdr /tmp/deploy;git clone https://github.com/dmyers2004/deploy.git /tmp/deploy;mv /tmp/deploy/deploy "'.__FILE__.'";chmod 755 "'.__FILE__.'"');
+
+		heading('self update complete');
+		exit();
+	}
+}
+
 chdir($_SERVER['PWD']);
 
 define('ROOTPATH',realpath($_SERVER['PWD']));
