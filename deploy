@@ -17,6 +17,8 @@ if (isset($_SERVER['argv'][1])) {
 	}
 }
 
+heading('Deploy Version 1.0');
+
 chdir($_SERVER['PWD']);
 
 define('ROOTPATH',realpath($_SERVER['PWD']));
