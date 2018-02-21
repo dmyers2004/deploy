@@ -9,7 +9,7 @@ cli command group
 */
 
 if (isset($_SERVER['argv'][1])) {
-	if ($_SERVER['argv'][1] == 'self_update') {
+	if ($_SERVER['argv'][1] == 'self-update' || $_SERVER['argv'][1] == 'selfupdate') {
 		passthru('rm -fdr /tmp/deploy;git clone https://github.com/dmyers2004/deploy.git /tmp/deploy;mv /tmp/deploy/deploy "'.__FILE__.'";chmod 755 "'.__FILE__.'"');
 
 		heading('self update complete');
@@ -30,13 +30,13 @@ if (!file_exists(ROOTPATH.'/deploy.json')) {
 	error('Could not locate deploy.json file');
 }
 
-if (!file_exists(ROOTPATH.'/_env')) {
-	error('Could not locate _env file');
+if (!file_exists(ROOTPATH.'/.env')) {
+	error('Could not locate .env file');
 }
 
-heading('Using ENV File '.ROOTPATH.'/_env');
+heading('Using ENV File '.ROOTPATH.'/.env');
 
-$_ENV = $_ENV + require ROOTPATH.'/_env';
+$_ENV = $_ENV + require ROOTPATH.'/.env';
 
 $build_filename = ROOTPATH.'/deploy.json';
 
