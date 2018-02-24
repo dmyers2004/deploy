@@ -1,0 +1,14 @@
+{
+	"self-update": [
+		"%Updates orange.phar to the latest version.",
+		"#self_update"
+	],
+	"selfupdate": [
+		"%Updates orange.phar to the latest version.",
+		"#self_update"
+	],
+	"create-project": [
+		"%Creates new project from a package into given directory.",
+		"#create_project"
+	]
+}
