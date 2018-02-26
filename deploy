@@ -91,6 +91,8 @@ $length = 0;
 
 $descriptions = o()->tools->get_descriptions($complete,$length);
 
+o()->tools->e('<red>Command "'.$option.'" is not defined.</red>');
+
 o()->tools->e('<orange>Available commands:</orange>');
 
 foreach ($actions as $a) {
