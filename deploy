@@ -1,9 +1,29 @@
 #!/usr/bin/env php
 <?php
 /*
-# php function
-* another command group
-cli command group
+Deploy Script
+
+@author Don Myers
+@copyright 2018
+@license http://opensource.org/licenses/MIT MIT License
+@link https://github.com/dmyers2004/deploy
+@version 2.0
+
+Using the Prefix of:
+
+#    - run a callable function in the Callable_functions class
+*    - run another deploy group
+none - Command line command
+
+included functions include
+set name value
+sudo (on|off)
+git_status (path)
+git_update (path|branch)
+show_git_repros (path)
+self_update()
+create_package(folder name)
+
 */
 
 $o = new stdclass();
