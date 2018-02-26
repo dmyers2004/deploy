@@ -26,6 +26,10 @@ create_package(folder name)
 
 */
 
+ini_set('memory_limit','512M');
+ini_set('display_errors', 1);
+error_reporting(E_ALL ^ E_NOTICE);
+
 $o = new stdclass();
 
 o()->tools = new Tools;
@@ -59,7 +63,7 @@ array_shift($args);
 $option = trim(implode(' ',$args));
 
 usort($actions,function($a,$b){
-  return strlen($b)-strlen($a);
+	return strlen($b)-strlen($a);
 });
 
 foreach ($actions as $a) {
@@ -94,10 +98,10 @@ foreach ($actions as $a) {
 exit(1);
 
 function o() {
-  /* bring the global scope variable into local scope */
+	/* bring the global scope variable into local scope */
 	global $o;
 
-  /* return it */
+	/* return it */
 	return $o;
 }
 
@@ -358,7 +362,7 @@ class Tools {
 			
 			if ($one == '%') {
 				/* description do nothing */
-			} elseif($one == '*') {			
+			} elseif($one == '*') {
 				/* another group */
 				$this->run(substr($cli,1),'');
 			} elseif($one == '#') {
@@ -560,7 +564,7 @@ class Eof {
 
 	public function env() {
 		$md5 = md5(microtime());
-		$text = base64_decode('PD9waHANCg0KcmV0dXJuIFsNCgknU0VSVkVSX0VOVklST05NRU5UJz0+J2RldmVsb3BtZW50JywgLyogZGV2ZWxvcG1lbnQsIHRlc3RpbmcsIHByb2R1Y3Rpb24gKi8NCgknU0VSVkVSX0RFQlVHJz0+J2RldmVsb3BtZW50JywgLyogZGV2ZWxvcG1lbnQsIHRlc3RpbmcsIHByb2R1Y3Rpb24gKi8NCgknTE9HX1RIUkVTSE9MRCc9PjAsDQoJJ0FDVElWRSBEQVRBQkFTRSBHUk9VUCc9Pidsb2NhbCcsIC8qIGRlZmF1bHQgZGF0YWJhc2UgZ3JvdXAgKi8NCgknRE9NQUlOJz0+bnVsbCwgLyogdGhlIGRvbWFpbiBvZiB0aGlzIGJveCAqLw0KDQoJJ2RhdGFiYXNlLmRlYnVnJz0+dHJ1ZSwNCg0KCSdjb25maWcuY2FjaGVfZGVmYXVsdCc9PidkdW1teScsDQoJJ2NvbmZpZy5jYWNoZV90dGwnPT4wLA0KCQ0KCSdlbmNyeXB0aW9uX2tleSc9PickbWQ1JywNCl07');	
+		$text = base64_decode('PD9waHANCg0KcmV0dXJuIFsNCgknU0VSVkVSX0VOVklST05NRU5UJz0+J2RldmVsb3BtZW50JywgLyogZGV2ZWxvcG1lbnQsIHRlc3RpbmcsIHByb2R1Y3Rpb24gKi8NCgknU0VSVkVSX0RFQlVHJz0+J2RldmVsb3BtZW50JywgLyogZGV2ZWxvcG1lbnQsIHRlc3RpbmcsIHByb2R1Y3Rpb24gKi8NCgknTE9HX1RIUkVTSE9MRCc9PjAsDQoJJ0FDVElWRSBEQVRBQkFTRSBHUk9VUCc9Pidsb2NhbCcsIC8qIGRlZmF1bHQgZGF0YWJhc2UgZ3JvdXAgKi8NCgknRE9NQUlOJz0+bnVsbCwgLyogdGhlIGRvbWFpbiBvZiB0aGlzIGJveCAqLw0KDQoJJ2RhdGFiYXNlLmRlYnVnJz0+dHJ1ZSwNCg0KCSdjb25maWcuY2FjaGVfZGVmYXVsdCc9PidkdW1teScsDQoJJ2NvbmZpZy5jYWNoZV90dGwnPT4wLA0KCQ0KCSdlbmNyeXB0aW9uX2tleSc9PickbWQ1JywNCl07');
 		return str_replace('$md5',$md5,$text);
 	}
 
