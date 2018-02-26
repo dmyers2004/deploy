@@ -30,6 +30,11 @@ ini_set('memory_limit','512M');
 ini_set('display_errors', 1);
 error_reporting(E_ALL ^ E_NOTICE);
 
+chdir($_SERVER['PWD']);
+
+define('ROOTPATH',realpath($_SERVER['PWD']));
+define('ESCROOTPATH',str_replace(' ','\ ',ROOTPATH));
+
 $o = new stdclass();
 
 o()->tools = new Tools;
@@ -38,17 +43,18 @@ o()->eof = new Eof;
 
 o()->tools->heading('Deploy Version 2.0');
 
-chdir($_SERVER['PWD']);
-
-define('ROOTPATH',realpath($_SERVER['PWD']));
-define('ESCROOTPATH',str_replace(' ','\ ',ROOTPATH));
-
 /* actions in the deploy file */
 $soft_actions_c = o()->tools->get_deploy();
 $soft_actions = ($soft_actions_c) ? array_keys($soft_actions_c) : [];
 
 $hard_actions_c = o()->tools->get_hard_actions();
 $hard_actions = ($hard_actions_c) ? array_keys($hard_actions_c) : [];
+
+$env = o()->tools->get_env();
+
+if (is_array($env)) {
+	$_ENV = $_ENV + $env;
+}
 
 $actions = array_merge($hard_actions,$soft_actions);
 $complete = array_merge($hard_actions_c,$soft_actions_c);
@@ -120,8 +126,8 @@ class Callable_functions {
 		foreach ($output as $o) {
 			$dirname = dirname(dirname($o));
 		
-			$branch = exec("cd ".s($dirname).";git rev-parse --abbrev-ref HEAD");
-			$hash = exec("cd ".s($dirname).";git rev-parse --verify HEAD");
+			$branch = exec("cd ".o()->tools->s($dirname).";git rev-parse --abbrev-ref HEAD");
+			$hash = exec("cd ".o()->tools->s($dirname).";git rev-parse --verify HEAD");
 			
 			$sections = explode('/',$dirname);
 			$package = end($sections);
@@ -132,9 +138,9 @@ class Callable_functions {
 
 	public function git_update($path,$branch=null) {
 		$branch = ($branch) ? $branch : $_ENV['GITBRANCH'];
-	
+
 		if (!file_exists($path.'/.git')) {
-			o()->tools->e('<red>Not a git folder '.$path.'</off>');
+			o()->tools->e('<red>Not a git folder '.$path.'.</off>');
 		} else {
 			passthru('cd '.$path.';git fetch --all;git reset --hard origin/'.$branch);
 		}
@@ -504,7 +510,7 @@ class Tools {
 		if (!file_exists($env_file)) {
 			$this->error('Could not locate .env file',false);
 		} else {
-			$this->heading('Using ENV File '.ROOTPATH.'/.env');
+			$this->heading('Using ENV File '.getcwd().'/.env');
 		
 			$return = require $env_file;
 		}
@@ -520,6 +526,8 @@ class Tools {
 		if (!file_exists($deploy_filename)) {
 			$this->error('Could not locate deploy.json file',false);
 		} else {
+			$this->heading('Using Deploy File '.getcwd().'/deploy.json');
+
 			$build_obj = json_decode(file_get_contents($deploy_filename));
 		
 			if ($build_obj === null) {
