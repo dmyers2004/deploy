@@ -1,6 +1,6 @@
 <?php
 
-class Callable_functions {
+class callable_functions {
 	public function set($name,$value) {
 		tools::e("set $name to $value");
 
@@ -69,7 +69,11 @@ class Callable_functions {
 		$src_folder = $dir.'/.deploy-src';
 
 		/*
-		rm -fdr /tmp/deploy;git clone https://github.com/dmyers2004/deploy.git /tmp/deploy;mv /tmp/deploy /home/shared/bin/deploy-src;ln -s /home/shared/bin/deploy-src/deploy.php /home/shared/bin/deploy;chmod 755 /home/shared/bin/deploy
+		rm -fdr /tmp/deploy
+		git clone https://github.com/dmyers2004/deploy.git /tmp/deploy
+		mv -fv /tmp/deploy /home/shared/bin/deploy-src
+		ln -sfv /home/shared/bin/deploy-src/deploy.php /home/shared/bin/deploy
+		chmod -v 755 /home/shared/bin/deploy
 		*/
 
 		$cli = 'rm -fdrv /tmp/deploy;git clone https://github.com/dmyers2004/deploy.git /tmp/deploy;mv -fv /tmp/deploy '.$src_folder.';ln -sfv '.$src_folder.'/deploy.php '.$file.';chmod -v 755 '.$file;

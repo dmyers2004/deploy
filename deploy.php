@@ -33,11 +33,12 @@ error_reporting(E_ALL ^ E_NOTICE);
 define('SCRIPTPATH',realpath(dirname(__FILE__)));
 define('ROOTPATH',realpath($_SERVER['PWD']));
 define('ESCROOTPATH',str_replace(' ','\ ',ROOTPATH));
+define('SUPPORTPATH',SCRIPTPATH.'/deploy_support');
 
 chdir($_SERVER['PWD']);
 
-require SCRIPTPATH.'/.deploy_support/Callable_functions.php';
-require SCRIPTPATH.'/.deploy_support/Tools.php';
+require SUPPORTPATH.'/callable_functions.php';
+require SUPPORTPATH.'/deploy_support/Tools.php';
 
 tools::set('rootpath',ROOTPATH);
 tools::set('erootpath',ESCROOTPATH);

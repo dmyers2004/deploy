@@ -1,6 +1,6 @@
 <?php 
 
-class Tools {
+class tools {
 	static public $sudo_setup = false;
 	static public $sudo = '';
 	static public $column_widths = [];
@@ -60,7 +60,7 @@ class Tools {
 	}
 
 	static public function func($command) {
-		$callable = new Callable_functions;
+		$callable = new callable_functions;
 
 		$function = self::get_function($command);
 		$args = self::get_arguments($command);
@@ -203,7 +203,7 @@ class Tools {
 	}
 
 	static public function get_hard_actions() {
-		$json_obj = json_decode(file_get_contents(SCRIPTPATH.'/.deploy_support/hard_actions.json'));
+		$json_obj = json_decode(file_get_contents(SUPPORTPATH.'/hard_actions.json'));
 	
 		if ($json_obj === null) {
 			self::error('hard_actions.json malformed',false);
