@@ -1,3 +1,4 @@
+#!/usr/bin/env php
 <?php
 /*
 Deploy Script
@@ -29,60 +30,45 @@ ini_set('memory_limit','512M');
 ini_set('display_errors', 1);
 error_reporting(E_ALL ^ E_NOTICE);
 
-chdir($_SERVER['PWD']);
-
-define('ROOTPATH',realpath(dirname(__FILE__)));
+define('SCRIPTPATH',realpath(dirname(__FILE__)));
+define('ROOTPATH',realpath($_SERVER['PWD']));
 define('ESCROOTPATH',str_replace(' ','\ ',ROOTPATH));
 
-require ROOTPATH.'/.deploy_support/Callable_functions.php';
-require ROOTPATH.'/.deploy_support/Tools.php';
+chdir($_SERVER['PWD']);
 
-$o = new stdclass();
+require SCRIPTPATH.'/.deploy_support/Callable_functions.php';
+require SCRIPTPATH.'/.deploy_support/Tools.php';
 
-$callable = new Callable_functions;
+tools::set('rootpath',ROOTPATH);
+tools::set('erootpath',ESCROOTPATH);
+tools::set('filename_date',date('Y-m-d-H:ia'));
+tools::set('scriptpath',SCRIPTPATH);
 
-tools::heading('Deploy Version 2.0');
+tools::heading('Deploy Version 3.0');
 
 /* actions in the deploy file */
 $hard_actions = tools::get_hard_actions();
 $soft_actions = tools::get_deploy();
 
-$env = tools::get_env();
-
-if (is_array($env)) {
-	$_ENV = $_ENV + $env;
-}
+tools::get_env(true);
 
 $complete = array_merge($hard_actions,$soft_actions);
-$actions = array_keys($complete);
+$group_name = implode(' ',array_slice($_SERVER['argv'],1));
 
-/* get option */
-$args = $_SERVER['argv'];
-
-/* shift of the script */
-array_shift($args);
-
-/* put them back together */
-$option = trim(implode(' ',$args));
-
-/* sort by length so short commands don't override longer ones */
-usort($actions,function($a,$b){
-	return strlen($b)-strlen($a);
+$actions = array_filter(array_keys($complete),function($v) {
+	return strtolower($v);
 });
 
-foreach ($actions as $a) {
-	if (strtolower(substr($option,0,strlen($a))) == strtolower($a)) {
-		/* we got a match! */
-		$group_name = strtolower(substr($option,0,strlen($a)));
-		$parameters = trim(substr($option,strlen($arg1)));
-		
-		tools::complete($complete);
-		tools::group($group_name,$parameters);
-		exit(1);
-	}
+if (in_array($group_name,$actions)) {
+	tools::$complete = $complete;
+
+	tools::grouping($group_name);
+
+	exit(1);
 }
 
 /* else show all the available options for where I am at */
+$actions = array_keys($complete);
 
 /* sort alphabetically */
 sort($actions);
@@ -106,8 +92,3 @@ foreach ($actions as $a) {
 }
 
 exit(1);
-
-function starts_with($string,$line) {
-	$string = strtolower(trim($string));
-	return (substr($line,0,strlen($string)) == $string);
-}

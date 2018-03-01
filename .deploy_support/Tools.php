@@ -4,129 +4,86 @@ class Tools {
 	static public $sudo_setup = false;
 	static public $sudo = '';
 	static public $column_widths = [];
-	static public $_internal;
+	static public $_internal = [];
 	static public $complete;
 
 	static public function set($name,$value) {
 		self::$_internal[$name] = $value;
 	}
-
-	static public function complete($complete) {
-		self::$complete = $complete;
-	}
-
-	static public function run($command,$parameters) {
-		global $callable;
 	
-		$one = substr($command,0,1);
-		
-		self::merge($command);
-		
-		if ($one == '%') {
-			/* description do nothing */
-		} elseif($one == '*') {
-			/* another group */
-			self::grouping(substr($command,1),'');
-		} elseif($one == '#') {
-			/* php function */
-			$function = self::get_function(substr($command,1));
-			$args = self::get_cli($parameters);
-			
-			if (!method_exists($callable,$function)) {
-				self::error("Callable Function $function Not Found.");
-			}
-			
-			call_user_func_array([$callable,$function],$args);
-		} elseif ('/') {
-			/* comment skip */
-		} else {
-			/* direct cli */
-			self::e('<off>'.self::$sudo.$command);
+	/* group has no parameters */
+	static public function grouping($group_name) {
+		$parameters = $_SERVER['argv'];
 
-			passthru(self::$sudo.$command,$exit_code);
-			
-			if ($exit_code > 0) {
-				break;
-			}
-		}
-	}
-
-	static public function grouping($group_name,$parameters) {
 		if (!isset(self::$complete[$group_name])) {
 			self::error("Grouping $group_name Not Found.");
 		}
 	
 		foreach (self::$complete[$group_name] as $command) {
-			self::run($command,$parameters);
+			$exit_code = self::run($command);
+			
+			if ($exit_code > 0) {
+				exit($exit_code);
+			}
 		}
 	}
 
-	static public function copyr($source, $dest) {
-		if (is_dir($source)) {
-			$dir_handle = opendir($source);
-			
-			while ($file=readdir($dir_handle)) {
-				if ($file!="." && $file!="..") {
-					if (is_dir($source."/".$file)) {
-						if (!is_dir($dest."/".$file)) {
-							mkdir($dest."/".$file);
-						}
-						
-						self::copyr($source."/".$file, $dest."/".$file);
-					} else {
-						copy($source."/".$file, $dest."/".$file);
-					}
-				}
+	static public function run($command) {	
+		self::merge($command);
+
+		$f = substr($command,0,1);
+		$c = substr($command,1);
+				
+		if ($f == '%') {
+			/* description */
+			self::e('<yellow>'.trim($c).'</yellow>');
+		} elseif($f == '*') {
+			/* run another group */
+			self::grouping($c);
+		} elseif ($f == '/') {
+			/* comment skip */
+		} elseif($f == '#') {
+			/* run php function */
+			$exit_code = self::func($c);
+
+			if ($exit_code > 0) {
+				return $exit_code;
 			}
-			
-			closedir($dir_handle);
 		} else {
-			copy($source, $dest);
+			/* raw cli */
+			$exit_code = self::cli($command);
+
+			if ($exit_code > 0) {
+				return $exit_code;
+			}
 		}
 	}
 
-	static public function rmdirr($dirname) {
-		if (!file_exists($dirname)) {
-			return false;
+	static public function func($command) {
+		$callable = new Callable_functions;
+
+		$function = self::get_function($command);
+		$args = self::get_arguments($command);
+				
+		if (!method_exists($callable,$function)) {
+			self::error("Callable Function $function Not Found.");
 		}
-		
-		if (is_file($dirname) || is_link($dirname)) {
-			return unlink($dirname);
-		}
-	
-		$dir = dir($dirname);
-		
-		while (false !== $entry = $dir->read()) {
-			if ($entry == '.' || $entry == '..') {
-				continue;
-			}
+
+		self::e('<off>Calling function '.$function.'('.implode(' ',$args).')');
+
+		return call_user_func_array([$callable,$function],$args);
+	}
+
+	static public function cli($command) {
+		$exit_code = 0;
+
+		self::e('<off>'.self::$sudo.$command);
+
+		passthru(self::$sudo.$command,$exit_code);
 			
-			self::rmdirr($dirname . DIRECTORY_SEPARATOR . $entry);
-		}
-	
-		$dir->close();
-		
-		return rmdir($dirname);
+		return $exit_code;
 	}
-	
-	static public function get_function($cli) {
-		$parts = explode(' ',$cli);
-	
-		return array_shift($parts);
-	}
-	
-	static public function get_cli($cli) {
-		$cli = str_replace('\ ',chr(9),trim($cli));
-	
-		$args = str_getcsv($cli,' ',"'");
-	
-		foreach ($args as $idx=>$val) {
-			$args[$idx] = str_replace(chr(9),'\ ',$val);
-		}
-	
-		return (array)$args;
-	}
-	
+
 	static public function e($txt) {
 		echo self::color($txt).chr(10);
 	}
@@ -168,21 +125,11 @@ class Tools {
 	}
 	
 	static public function merge(&$input) {
-		foreach ($_ENV as $key=>$val) {
-			$input = str_replace('{'.strtolower($key).'}',$val,$input);
-		}
-		
-		$input = str_replace(['{rootpath}','{erootpath}','{filename_date}'],[ROOTPATH,ESCROOTPATH,date('Y-m-d-H:ia')],$input);
-	
-		foreach ((array)self::$_internal as $key=>$val) {
+		foreach (array_merge($_ENV,self::$_internal) as $key=>$val) {
 			$input = str_replace('{'.strtolower($key).'}',$val,$input);
 		}
 	}
 		
-	static public function s($input) {
-		return str_replace(' ','\ ',$input);
-	}
-
 	static public function color($input) {
 		// Set up shell colors
 		$foreground_colors['off'] = '0;0';
@@ -213,7 +160,7 @@ class Tools {
 		return $input;
 	}
 	
-	static public function get_env() {
+	static public function get_env($load=false) {
 		$env_file = getcwd().'/.env';
 
 		$return = false;
@@ -224,6 +171,10 @@ class Tools {
 			self::heading('Using ENV File '.getcwd().'/.env');
 		
 			$return = require $env_file;
+		}
+		
+		if ($load) {
+			$_ENV = $_ENV + $return;
 		}
 		
 		return $return;
@@ -252,7 +203,7 @@ class Tools {
 	}
 
 	static public function get_hard_actions() {
-		$json_obj = json_decode(phar_file_get_contents('hard_actions'));
+		$json_obj = json_decode(file_get_contents(SCRIPTPATH.'/.deploy_support/hard_actions.json'));
 	
 		if ($json_obj === null) {
 			self::error('hard_actions.json malformed',false);
@@ -279,6 +230,30 @@ class Tools {
 		return $c;
 	}
 
+	static public function get_function($cli) {
+		$parts = explode(' ',$cli);
+	
+		return array_shift($parts);
+	}
+	
+	static public function get_arguments($cli) {
+		$cli = explode(' ',$cli);
+
+		array_shift($cli);
+		
+		$cli = implode(' ',$cli);
+	
+		$cli = str_replace('\ ',chr(9),trim($cli));
+	
+		$args = str_getcsv($cli,' ',"'");
+	
+		foreach ($args as $idx=>$val) {
+			$args[$idx] = str_replace(chr(9),'\ ',$val);
+		}
+	
+		return (array)$args;
+	}
+	
 	static public function after($tag,$searchthis) {
 		if (!is_bool(strpos($searchthis,$tag)))
 		return substr($searchthis,strpos($searchthis,$tag)+strlen($tag));
@@ -300,24 +275,24 @@ class Tools {
 		$action = '';
 
 		foreach ($build_array as $line) {
-			if (starts_with('<file name="',$line)) {
+			if (self::starts_with('<file name="',$line)) {
 				$filename = self::between('"','"',$line);
-			} elseif(starts_with('<find>',$line)) {
+			} elseif(self::starts_with('<find>',$line)) {
 				$action = 'find';
-			} elseif(starts_with('</find>',$line)) {
+			} elseif(self::starts_with('</find>',$line)) {
 				$action = '';
-			} elseif(starts_with('<replace>',$line)) {
+			} elseif(self::starts_with('<replace>',$line)) {
 				$action = 'replace';
-			} elseif(starts_with('</replace>',$line)) {
+			} elseif(self::starts_with('</replace>',$line)) {
 				$action = '';
 
 				self::build_find_replace($filename,$find,$replace);
 
 				$find = '';
 				$replace = '';
-			} elseif(starts_with('<create>',$line)) {
+			} elseif(self::starts_with('<create>',$line)) {
 				$action = 'create';
-			} elseif(starts_with('</create>',$line)) {
+			} elseif(self::starts_with('</create>',$line)) {
 				$action = '';
 
 				self::build_create($filename,$create);
@@ -331,6 +306,11 @@ class Tools {
 				$create .= $line.chr(10);
 			}			
 		}
+	}
+
+	static public function starts_with($string,$line) {
+		$string = strtolower(trim($string));
+		return (substr($line,0,strlen($string)) == $string);
 	}
 	
 	static public function build_create($filename,$content) {

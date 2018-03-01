@@ -1,0 +1,5 @@
+mysql -u donmyers -p < echo "DROP DATABASE skynet-test;"
+
+mysqldump --compress -Y -i -f -v --create-options -E -R --triggers -K --add-locks --single-transaction --user=donmyers skynet -p > /home/donmyers/skynet.sql
+
+mysql -u donmyers -p skynet-test < /home/donmyers/skynet.sql

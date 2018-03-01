@@ -8,7 +8,7 @@ class Callable_functions {
 	}
 
 	public function copy_file($support_filename,$to_path) {
-		copy(ROOTPATH.'/.support/'.$support_filename.'.txt',$to_path);
+		copy(SCRIPTPATH.'/.support/'.$support_filename.'.txt',$to_path);
 	}
 
 	public function git_status($path) {
@@ -51,22 +51,26 @@ class Callable_functions {
 		tools::e("sudo $on");
 
 		if ($on == 'on') {
-			if (!tools::sudo_setup) {
+			if (!tools::$sudo_setup) {
 				passthru('sudo touch -c foo');
 			}
 
-			tools::sudo = 'sudo ';
+			tools::$sudo = 'sudo ';
 		} else {
-			tools::sudo = '';
+			tools::$sudo = '';
 		}
 	}
 
 	public function self_update() {
 		tools::heading('Updating Self');
 
-		$file = str_replace('phar://','',dirname(dirname(__FILE__)));
+		$dir = str_replace(' ','\ ',dirname(__DIR__));
+		$file = $dir.'/deploy';
+		$src_folder = $dir.'/deploy-src';
 
-		passthru('rm -fdr /tmp/deploy;git clone https://github.com/dmyers2004/deploy.git /tmp/deploy;mv /tmp/deploy/deploy.phar "'.$file.'";chmod 755 "'.$file.'"');
+		$cli = 'rm -fdr /tmp/deploy;git clone https://github.com/dmyers2004/deploy.git /tmp/deploy;mv /tmp/deploy '.$src_folder.';ln -s '.$src_folder.'/deploy.php '.$file.';chmod 755 '.$file;
+
+		passthru($cli);
 
 		tools::heading('Update Complete');
 	}
