@@ -1,10 +1,10 @@
 {
 	"self-update": [
-		"%Updates deploy.phar to the latest version.",
+		"%Updates deploy to the latest version.",
 		"#self_update"
 	],
 	"selfupdate": [
-		"%Updates deploy.phar to the latest version.",
+		"%Updates deploy to the latest version.",
 		"#self_update"
 	],
 	"create-project": [
