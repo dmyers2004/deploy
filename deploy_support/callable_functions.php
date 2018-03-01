@@ -61,7 +61,7 @@ class callable_functions {
 	public function self_update() {
 		tools::heading('Updating Self');
 
-		$dir = str_replace(' ','\ ',dirname(__DIR__));
+		$dir = str_replace(' ','\ ',dirname(DEPLOYFILE));
 		$file = $dir.'/deploy';
 		$src_folder = $dir.'/.deploy-src';
 

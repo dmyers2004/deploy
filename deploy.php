@@ -33,6 +33,7 @@ error_reporting(E_ALL ^ E_NOTICE);
 define('ROOTPATH',realpath($_SERVER['PWD'])); /* path to the folder we are in now */
 define('SCRIPTPATH',realpath(dirname(__FILE__))); /* path to this scripts folder */
 define('SUPPORTPATH',SCRIPTPATH.'/deploy_support'); /* path to support files */
+define('DEPLOYFILE',$_SERVER["SCRIPT_FILENAME"]);
 
 require SUPPORTPATH.'/callable_functions.php';
 require SUPPORTPATH.'/tools.php';
