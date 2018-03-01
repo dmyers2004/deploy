@@ -1,0 +1,47 @@
+{
+	"self-update": [
+		"%Updates deploy.phar to the latest version.",
+		"#self_update"
+	],
+	"selfupdate": [
+		"%Updates deploy.phar to the latest version.",
+		"#self_update"
+	],
+	"create-project": [
+		"% !work in progress - Creates new project from a package into given directory.",
+		"#create_project",
+		"mkdir -p {efolder}/bin",
+		"cd {efolder};composer require codeigniter/framework",
+		"mkdir -p {efolder}/public",
+		"mkdir -p {efolder}/public/assets",
+		"mkdir -p {efolder}/public/theme",
+		"mkdir -p {efolder}/application",
+		"mkdir -p {efolder}/support",
+		"mkdir -p {efolder}/support/migrations",
+		"mkdir -p {efolder}/support/misc",
+		"mkdir -p {efolder}/support/backups",
+		"mkdir -p {efolder}/support/import",
+		"mkdir -p {efolder}/packages",
+		"mkdir -p {efolder}/var",
+		"mkdir -p {efolder}/var/logs",
+		"mkdir -p {efolder}/var/cache",
+		"mkdir -p {efolder}/var/downloads",
+		"mkdir -p {efolder}/var/uploads",
+		"mkdir -p {efolder}/var/emails",
+		"mkdir -p {efolder}/var/sessions",
+		"cp -R {efolder}/vendor/codeigniter/framework/application/* {efolder}/application",
+		"cp {efolder}/vendor/codeigniter/framework/index.php {efolder}/public/index.php",
+		"#create_project_create_find_replace",
+		"rm {efolder}/application/config/hooks.php",
+		"rm {efolder}/application/config/smileys.php",
+		"rm -fdr {efolder}/application/cache",
+		"rm -fdr {efolder}/application/core",
+		"rm -fdr {efolder}/application/hooks",
+		"rm -fdr {efolder}/application/logs",
+		"rm -fdr {efolder}/application/language/english",
+		"rm -fdr {efolder}/application/language",
+		"rm -fdr {efolder}/application/third_party",
+		"find {efolder} -type f -name 'index.html' -delete",
+		"find {efolder} -type f -name '.DS_Store' -delete"
+	]
+}
