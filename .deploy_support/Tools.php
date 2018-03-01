@@ -173,7 +173,7 @@ class Tools {
 			$return = require $env_file;
 		}
 		
-		if ($load) {
+		if ($load && is_array($return)) {
 			$_ENV = $_ENV + $return;
 		}
 		
