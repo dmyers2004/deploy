@@ -72,7 +72,7 @@ class Callable_functions {
 		rm -fdr /tmp/deploy;git clone https://github.com/dmyers2004/deploy.git /tmp/deploy;mv /tmp/deploy /home/shared/bin/deploy-src;ln -s /home/shared/bin/deploy-src/deploy.php /home/shared/bin/deploy;chmod 755 /home/shared/bin/deploy
 		*/
 
-		$cli = 'rm '.$file.';rm -fdr /tmp/deploy;git clone https://github.com/dmyers2004/deploy.git /tmp/deploy;mv /tmp/deploy '.$src_folder.';ln -s '.$src_folder.'/deploy.php '.$file.';chmod 755 '.$file;
+		$cli = 'rm -fdrv /tmp/deploy;git clone https://github.com/dmyers2004/deploy.git /tmp/deploy;mv -fv /tmp/deploy '.$src_folder.';ln -sfv '.$src_folder.'/deploy.php '.$file.';chmod -v 755 '.$file;
 
 		passthru($cli);
 
