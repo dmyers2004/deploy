@@ -66,7 +66,7 @@ class Callable_functions {
 
 		$dir = str_replace(' ','\ ',dirname(__DIR__));
 		$file = $dir.'/deploy';
-		$src_folder = $dir.'/deploy-src';
+		$src_folder = $dir.'/.deploy-src';
 
 		/*
 		rm -fdr /tmp/deploy;git clone https://github.com/dmyers2004/deploy.git /tmp/deploy;mv /tmp/deploy /home/shared/bin/deploy-src;ln -s /home/shared/bin/deploy-src/deploy.php /home/shared/bin/deploy;chmod 755 /home/shared/bin/deploy
