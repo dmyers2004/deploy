@@ -7,8 +7,8 @@ class callable_functions {
 		tools::set($name,$value);
 	}
 
-	public function copy_file($support_filename,$to_path) {
-		copy(SCRIPTPATH.'/.support/'.$support_filename.'.txt',$to_path);
+	public function copy_support_file($support_filename,$to_path) {
+		copy(supportpath.'/'.$support_filename,$to_path);
 	}
 
 	public function git_status($path) {
@@ -19,8 +19,8 @@ class callable_functions {
 		foreach ($output as $o) {
 			$dirname = dirname(dirname($o));
 
-			$branch = exec("cd ".tools::s($dirname).";git rev-parse --abbrev-ref HEAD");
-			$hash = exec("cd ".tools::s($dirname).";git rev-parse --verify HEAD");
+			$branch = exec("cd ".str_replace(' ','\ ',$dirname).";git rev-parse --abbrev-ref HEAD");
+			$hash = exec("cd ".str_replace(' ','\ ',$dirname).";git rev-parse --verify HEAD");
 
 			$sections = explode('/',$dirname);
 			$package = end($sections);
@@ -35,7 +35,7 @@ class callable_functions {
 		if (!file_exists($path.'/.git')) {
 			tools::e('<red>Not a git folder '.$path.'.</off>');
 		} else {
-			passthru('cd '.$path.';git fetch --all;git reset --hard origin/'.$branch);
+			tools::shell('cd '.$path.';git fetch --all;git reset --hard origin/'.$branch);
 		}
 	}
 
@@ -48,13 +48,10 @@ class callable_functions {
 	}
 
 	public function sudo($on) {
-		tools::e("sudo $on");
-
 		if ($on == 'on') {
 			if (!tools::$sudo_setup) {
-				passthru('sudo touch -c foo');
+				tools::shell('sudo touch -c foo');
 			}
-
 			tools::$sudo = 'sudo ';
 		} else {
 			tools::$sudo = '';
@@ -71,8 +68,8 @@ class callable_functions {
 		/*
 		rm -fdr /tmp/deploy
 		git clone https://github.com/dmyers2004/deploy.git /tmp/deploy
-		mv -fv /tmp/deploy /home/shared/bin/deploy-src
-		ln -sfv /home/shared/bin/deploy-src/deploy.php /home/shared/bin/deploy
+		mv -fv /tmp/deploy /home/shared/bin/.deploy-src
+		ln -sfv /home/shared/bin/.deploy-src/deploy.php /home/shared/bin/deploy
 		chmod -v 755 /home/shared/bin/deploy
 		*/
 
@@ -102,8 +99,6 @@ class callable_functions {
 		mkdir($folder);
 		chdir($folder);
 
-		tools::set('folder',$folder);
-		tools::set('efolder',tools::s($folder));
 		tools::set('%md5%',md5(microtime()));
 	}
 

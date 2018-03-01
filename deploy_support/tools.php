@@ -21,10 +21,6 @@ class tools {
 	
 		foreach (self::$complete[$group_name] as $command) {
 			$exit_code = self::run($command);
-			
-			if ($exit_code > 0) {
-				exit($exit_code);
-			}
 		}
 	}
 
@@ -39,7 +35,14 @@ class tools {
 			self::e('<yellow>'.trim($c).'</yellow>');
 		} elseif($f == '*') {
 			/* run another group */
-			self::grouping($c);
+			
+			self::e('<cyan>Run Grouping '.$c);
+			
+			$exit_code = self::grouping($c);
+			
+			if ($exit_code > 0) {
+				self::error('Exit Code '.$exit_code);
+			}
 		} elseif ($f == '/') {
 			/* comment skip */
 		} elseif($f == '#') {
@@ -47,14 +50,14 @@ class tools {
 			$exit_code = self::func($c);
 
 			if ($exit_code > 0) {
-				return $exit_code;
+				self::error('Exit Code '.$exit_code);
 			}
 		} else {
 			/* raw cli */
 			$exit_code = self::cli($command);
 
 			if ($exit_code > 0) {
-				return $exit_code;
+				self::error('Exit Code '.$exit_code);
 			}
 		}
 	}
@@ -79,7 +82,7 @@ class tools {
 
 		self::e('<off>'.self::$sudo.$command);
 
-		passthru(self::$sudo.$command,$exit_code);
+		tools::shell(self::$sudo.$command,$exit_code);
 			
 		return $exit_code;
 	}
@@ -255,8 +258,7 @@ class tools {
 	}
 	
 	static public function after($tag,$searchthis) {
-		if (!is_bool(strpos($searchthis,$tag)))
-		return substr($searchthis,strpos($searchthis,$tag)+strlen($tag));
+		return (!is_bool(strpos($searchthis,$tag))) ? substr($searchthis,strpos($searchthis,$tag)+strlen($tag)) : '';
 	}
 	
 	static public function before($tag,$searchthis) {
@@ -328,5 +330,19 @@ class tools {
 	
 		return file_put_contents(getcwd().'/'.$filename,str_replace($find,$replace,file_get_contents(getcwd().'/'.$filename)));
 	}
-	
+
+	static public function shell($cmd, &$stdout=null, &$stderr=null) {
+		$proc = proc_open($cmd,[
+				1 => ['pipe','w'],
+				2 => ['pipe','w'],
+		],$pipes);
+		
+		$stdout = stream_get_contents($pipes[1]);
+		fclose($pipes[1]);
+		
+		$stderr = stream_get_contents($pipes[2]);
+		fclose($pipes[2]);
+		
+		return proc_close($proc);
+	}	
 } /* end class */

@@ -30,31 +30,25 @@ ini_set('memory_limit','512M');
 ini_set('display_errors', 1);
 error_reporting(E_ALL ^ E_NOTICE);
 
-define('SCRIPTPATH',realpath(dirname(__FILE__)));
-define('ROOTPATH',realpath($_SERVER['PWD']));
-define('ESCROOTPATH',str_replace(' ','\ ',ROOTPATH));
-define('SUPPORTPATH',SCRIPTPATH.'/deploy_support');
-
-chdir($_SERVER['PWD']);
+define('ROOTPATH',realpath($_SERVER['PWD'])); /* path to the folder we are in now */
+define('SCRIPTPATH',realpath(dirname(__FILE__))); /* path to this scripts folder */
+define('SUPPORTPATH',SCRIPTPATH.'/deploy_support'); /* path to support files */
 
 require SUPPORTPATH.'/callable_functions.php';
 require SUPPORTPATH.'/tools.php';
 
 tools::set('rootpath',ROOTPATH);
-tools::set('erootpath',ESCROOTPATH);
+tools::set('erootpath',str_replace(' ','\ ',ROOTPATH));
 tools::set('filename_date',date('Y-m-d-H:ia'));
 tools::set('scriptpath',SCRIPTPATH);
+tools::set('supportpath',SUPPORTPATH);
 
 tools::heading('Deploy Version 3.0');
 
-/* actions in the deploy file */
-$hard_actions = tools::get_hard_actions();
-$soft_actions = tools::get_deploy();
+$complete = array_merge(tools::get_hard_actions(),tools::get_deploy());
+$group_name = implode(' ',array_slice($_SERVER['argv'],1));
 
 tools::get_env(true);
-
-$complete = array_merge($hard_actions,$soft_actions);
-$group_name = implode(' ',array_slice($_SERVER['argv'],1));
 
 $actions = array_filter(array_keys($complete),function($v) {
 	return strtolower($v);
