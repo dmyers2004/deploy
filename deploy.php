@@ -38,7 +38,7 @@ define('SUPPORTPATH',SCRIPTPATH.'/deploy_support');
 chdir($_SERVER['PWD']);
 
 require SUPPORTPATH.'/callable_functions.php';
-require SUPPORTPATH.'/deploy_support/Tools.php';
+require SUPPORTPATH.'/tools.php';
 
 tools::set('rootpath',ROOTPATH);
 tools::set('erootpath',ESCROOTPATH);
