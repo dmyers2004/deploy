@@ -22,7 +22,12 @@ git_status (path)
 git_update (path|branch)
 show_git_repros (path)
 self_update()
+echo()
+
+!todo
 create_package(folder name)
+#on error stop
+#on error continue
 
 */
 

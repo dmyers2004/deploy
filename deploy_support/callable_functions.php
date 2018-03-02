@@ -7,6 +7,14 @@ class callable_functions {
 		tools::set($name,$value);
 	}
 
+	public function echo($txt) {
+		tools::e($txt);
+	}
+
+	public function on($what,$do_this) {
+		/* !todo */
+	}
+
 	public function copy_support_file($support_filename,$to_path) {
 		copy(supportpath.'/'.$support_filename,$to_path);
 	}

@@ -6,6 +6,7 @@ class tools {
 	static public $column_widths = [];
 	static public $_internal = [];
 	static public $complete;
+	static public $on_error_stop = false;
 
 	static public function set($name,$value) {
 		self::$_internal[$name] = $value;

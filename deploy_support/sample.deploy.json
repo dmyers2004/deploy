@@ -18,15 +18,15 @@
 		"rm -f {erootpath}/public/assets/backorder",
 		"rm -f {erootpath}/public/assets/stock-status-check",
     "ln -s {erootpath}/packages/projectorangebox/theme-orange/public/theme/orange {erootpath}/public/theme/orange",
-    "ln -s {erootpath}/packages/quadratec/backorder/public/assets/backorder {erootpath}/public/assets/backorder",
-    "ln -s {erootpath}/packages/quadratec/stock-status-check/public/assets/stock-status-check {erootpath}/public/assets/stock-status-check"
+    "ln -s {erootpath}/packages/cashmoney/backorder/public/assets/backorder {erootpath}/public/assets/backorder",
+    "ln -s {erootpath}/packages/cashmoney/stock-status-check/public/assets/stock-status-check {erootpath}/public/assets/stock-status-check"
   ],
 	"copy public": [
 		"% Copy complete folders between package folders and public folders.",
 		"#sudo on",
     "cp -R {erootpath}/packages/projectorangebox/theme-orange/public/theme/orange {erootpath}/public/theme/orange",
-    "cp -R {erootpath}/packages/quadratec/backorder/public/assets/backorder {erootpath}/public/assets/backorder",
-    "cp -R {erootpath}/packages/quadratec/stock-status-check/public/assets/stock-status-check {erootpath}/public/assets/stock-status-check"
+    "cp -R {erootpath}/packages/cashmoney/backorder/public/assets/backorder {erootpath}/public/assets/backorder",
+    "cp -R {erootpath}/packages/cashmoney/stock-status-check/public/assets/stock-status-check {erootpath}/public/assets/stock-status-check"
   ],
   "clear sessions": [
 		"% delete all files in the session folder.",
@@ -93,9 +93,9 @@
 		"#git_update {erootpath}/packages/projectorangebox/tasks",
 		"#git_update {erootpath}/packages/projectorangebox/theme-orange",
 		"#git_update {erootpath}/packages/projectorangebox/tooltips",
-		"#git_update {erootpath}/packages/quadratec/backorder",
-		"#git_update {erootpath}/packages/quadratec/drop-ships",
-		"#git_update {erootpath}/packages/quadratec/stock-status-check"
+		"#git_update {erootpath}/packages/cashmoney/backorder",
+		"#git_update {erootpath}/packages/cashmoney/drop-ships",
+		"#git_update {erootpath}/packages/cashmoney/stock-status-check"
 	],
 	"git basic update": [
 		"% Fetch and Reset the basic git Modules.",
@@ -103,8 +103,8 @@
 		"#git_update {erootpath}",
 		"#git_update {erootpath}/packages/projectorangebox/orange",
 		"#git_update {erootpath}/packages/projectorangebox/theme-orange",
-		"#git_update {erootpath}/packages/quadratec/backorder",
-		"#git_update {erootpath}/packages/quadratec/drop-ships"
+		"#git_update {erootpath}/packages/cashmoney/backorder",
+		"#git_update {erootpath}/packages/cashmoney/drop-ships"
 	],
 	"git status": [
 		"% Show the GIT branches of the projects git folders.",
