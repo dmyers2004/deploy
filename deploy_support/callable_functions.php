@@ -43,6 +43,8 @@ class callable_functions {
 		if (!file_exists($path.'/.git')) {
 			tools::e('<red>Not a git folder '.$path.'.</off>');
 		} else {
+			tools::e('cd '.$path.';git fetch --all;git reset --hard origin/'.$branch);
+		
 			tools::shell('cd '.$path.';git fetch --all;git reset --hard origin/'.$branch);
 		}
 	}
