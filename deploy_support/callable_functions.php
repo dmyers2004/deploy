@@ -77,15 +77,19 @@ class callable_functions {
 
 		/*
 		rm -fdr /tmp/deploy
+		rm -fdr /home/shared/bin/.deploy-src/deploy
 		git clone https://github.com/dmyers2004/deploy.git /tmp/deploy
 		mv -fv /tmp/deploy /home/shared/bin/.deploy-src
 		ln -sfv /home/shared/bin/.deploy-src/deploy.php /home/shared/bin/deploy
 		chmod -v 755 /home/shared/bin/deploy
 		*/
 
-		$cli = 'rm -fdrv '.$src_folder.';rm -fdrv /tmp/deploy;git clone https://github.com/dmyers2004/deploy.git /tmp/deploy;mv -fv /tmp/deploy '.$src_folder.';ln -sfv '.$src_folder.'/deploy.php '.$file.';chmod -v 755 '.$file;
-
-		passthru($cli);
+		exec('rm -fdrv '.$src_folder);
+		exec('rm -fdrv /tmp/deploy');
+		exec('git clone https://github.com/dmyers2004/deploy.git /tmp/deploy');
+		exec('mv -fv /tmp/deploy '.$src_folder);
+		exec('ln -sfv '.$src_folder.'/deploy.php '.$file);
+		exec('chmod -v 755 '.$file);
 
 		tools::heading('Update Complete');
 	}
