@@ -77,15 +77,17 @@ class callable_functions {
 
 		/*
 		rm -fdr /tmp/deploy
-		rm -fdr /home/shared/bin/.deploy-src/deploy
+		rm -fdr /home/shared/bin/.deploy-src
+		rm /home/shared/bin/deploy
 		git clone https://github.com/dmyers2004/deploy.git /tmp/deploy
 		mv -fv /tmp/deploy /home/shared/bin/.deploy-src
 		ln -sfv /home/shared/bin/.deploy-src/deploy.php /home/shared/bin/deploy
 		chmod -v 755 /home/shared/bin/deploy
 		*/
 
-		exec('rm -fdrv '.$src_folder);
 		exec('rm -fdrv /tmp/deploy');
+		exec('rm -fdrv '.dirname($src_folder));
+		exec('rm '.$src_folder.'/deploy.php');
 		exec('git clone https://github.com/dmyers2004/deploy.git /tmp/deploy');
 		exec('mv -fv /tmp/deploy '.$src_folder);
 		exec('ln -sfv '.$src_folder.'/deploy.php '.$file);
