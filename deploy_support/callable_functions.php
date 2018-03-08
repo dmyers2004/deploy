@@ -87,7 +87,6 @@ class callable_functions {
 
 		exec('sudo rm -fdrv /tmp/deploy');
 		exec('sudo rm -fdrv '.$src_folder);
-		exec('sudo rm '.$src_folder.'/deploy.php');
 		exec('sudo git clone https://github.com/dmyers2004/deploy.git /tmp/deploy');
 		exec('sudo mv -fv /tmp/deploy '.$src_folder);
 		exec('sudo ln -sfv '.$src_folder.'/deploy.php '.$file);
