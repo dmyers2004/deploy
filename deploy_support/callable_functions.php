@@ -85,13 +85,13 @@ class callable_functions {
 		chmod -v 755 /home/shared/bin/deploy
 		*/
 
-		exec('rm -fdrv /tmp/deploy');
-		exec('rm -fdrv '.dirname($src_folder));
-		exec('rm '.$src_folder.'/deploy.php');
-		exec('git clone https://github.com/dmyers2004/deploy.git /tmp/deploy');
-		exec('mv -fv /tmp/deploy '.$src_folder);
-		exec('ln -sfv '.$src_folder.'/deploy.php '.$file);
-		exec('chmod -v 755 '.$file);
+		exec('sudo rm -fdrv /tmp/deploy');
+		exec('sudo rm -fdrv '.$src_folder);
+		exec('sudo rm '.$src_folder.'/deploy.php');
+		exec('sudo git clone https://github.com/dmyers2004/deploy.git /tmp/deploy');
+		exec('sudo mv -fv /tmp/deploy '.$src_folder);
+		exec('sudo ln -sfv '.$src_folder.'/deploy.php '.$file);
+		exec('sudo chmod -v 755 '.$file);
 
 		tools::heading('Update Complete');
 	}
