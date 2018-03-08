@@ -49,7 +49,7 @@ tools::set('filename_date',date('Y-m-d-H:ia'));
 tools::set('scriptpath',SCRIPTPATH);
 tools::set('supportpath',SUPPORTPATH);
 
-tools::heading('Deploy Version 3.0');
+tools::heading('Deploy Version 3.1');
 
 $complete = array_merge(tools::get_hard_actions(),tools::get_deploy());
 $group_name = implode(' ',array_slice($_SERVER['argv'],1));
