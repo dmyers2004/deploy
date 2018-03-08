@@ -39,6 +39,7 @@ define('ROOTPATH',realpath($_SERVER['PWD'])); /* path to the folder we are in no
 define('SCRIPTPATH',realpath(dirname(__FILE__))); /* path to this scripts folder */
 define('SUPPORTPATH',SCRIPTPATH.'/deploy_support'); /* path to support files */
 define('DEPLOYFILE',$_SERVER["SCRIPT_FILENAME"]);
+define('VERSION','3.2');
 
 require SUPPORTPATH.'/callable_functions.php';
 require SUPPORTPATH.'/tools.php';
@@ -49,7 +50,7 @@ tools::set('filename_date',date('Y-m-d-H:ia'));
 tools::set('scriptpath',SCRIPTPATH);
 tools::set('supportpath',SUPPORTPATH);
 
-tools::heading('Deploy Version 3.1');
+tools::heading('Deploy Version '.VERSION);
 
 $complete = array_merge(tools::get_hard_actions(),tools::get_deploy());
 $group_name = implode(' ',array_slice($_SERVER['argv'],1));

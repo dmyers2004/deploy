@@ -129,8 +129,21 @@ class tools {
 	}
 	
 	static public function merge(&$input) {
-		foreach (array_merge($_ENV,self::$_internal) as $key=>$val) {
-			$input = str_replace('{'.strtolower($key).'}',$val,$input);
+		/* find all the {???} and make sure we have keys */
+		$found = preg_match_all('/{(.+?)}/m', $input, $matches, PREG_SET_ORDER, 0);
+
+		$merge = array_merge($_ENV,self::$_internal);
+
+		if ($found > 0) {
+			foreach ($matches as $match) {
+				if (!isset($merge[$match[1]])) {
+					self::error('Missing Merge Key "'.$match[1].'"');
+				}
+			}
+			
+			foreach ($merge as $key=>$val) {
+				$input = str_replace('{'.strtolower($key).'}',$val,$input);
+			}
 		}
 	}
 		

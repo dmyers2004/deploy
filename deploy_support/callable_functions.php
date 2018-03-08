@@ -40,6 +40,10 @@ class callable_functions {
 	public function git_update($path,$branch=null) {
 		$branch = ($branch) ? $branch : $_ENV['GITBRANCH'];
 
+		if (empty($branch)) {
+			tools::error('GIT Branch not specified please provide $_ENV[\'GITBRANCH\']');
+		}
+
 		if (!file_exists($path.'/.git')) {
 			tools::e('<red>Not a git folder '.$path.'.</off>');
 		} else {
