@@ -130,7 +130,7 @@ class tools {
 	
 	static public function merge(&$input) {
 		/* find all the {???} and make sure we have keys */
-		$found = preg_match_all('/{(.+?)}/m', $input, $matches, PREG_SET_ORDER, 0);
+		$found = preg_match_all('/{(.+?)}/m', strtolower($input), $matches, PREG_SET_ORDER, 0);
 
 		$merge = array_merge($_ENV,self::$_internal);
 
