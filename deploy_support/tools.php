@@ -132,7 +132,7 @@ class tools {
 		/* find all the {???} and make sure we have keys */
 		$found = preg_match_all('/{(.+?)}/m', strtolower($input), $matches, PREG_SET_ORDER, 0);
 
-		$merge = array_merge($_ENV,self::$_internal);
+		$merge = array_change_key_case(array_merge($_ENV,self::$_internal),CASE_LOWER);
 
 		if ($found > 0) {
 			foreach ($matches as $match) {
@@ -142,7 +142,7 @@ class tools {
 			}
 			
 			foreach ($merge as $key=>$val) {
-				$input = str_replace('{'.strtolower($key).'}',$val,$input);
+				$input = str_replace('{'.$key.'}',$val,$input);
 			}
 		}
 	}
