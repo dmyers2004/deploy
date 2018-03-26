@@ -1,12 +1,12 @@
 <?php 
 
 class tools {
-	static public $sudo_setup = false;
-	static public $sudo = '';
 	static public $column_widths = [];
 	static public $_internal = [];
 	static public $complete;
 	static public $on_error_stop = false;
+	static public $prefix = '';
+	static public $suffix = '';
 
 	static public function set($name,$value) {
 		self::$_internal[$name] = $value;
@@ -81,9 +81,9 @@ class tools {
 	static public function cli($command) {
 		$exit_code = 0;
 
-		self::e('<off>'.self::$sudo.$command);
+		self::e('<off>'.self::$prefix.$command.self::$suffix);
 
-		tools::shell(self::$sudo.$command,$exit_code);
+		tools::shell(self::$prefix.$command.self::$suffix,$exit_code);
 			
 		return $exit_code;
 	}

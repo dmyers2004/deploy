@@ -1,6 +1,8 @@
 <?php
 
 class callable_functions {
+	public $sudo_setup = false;
+
 	public function set($name,$value) {
 		tools::e("set $name to $value");
 
@@ -62,13 +64,14 @@ class callable_functions {
 	}
 
 	public function sudo($on) {
+		/* since prefix is only used for sudo right no we can just ram jam it on */
 		if ($on == 'on') {
-			if (!tools::$sudo_setup) {
+			if (!$this->sudo_setup) {
 				tools::shell('sudo touch -c foo');
 			}
-			tools::$sudo = 'sudo ';
+			tools::$prefix = 'sudo ';
 		} else {
-			tools::$sudo = '';
+			tools::$prefix = '';
 		}
 	}
 
