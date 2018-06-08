@@ -20,6 +20,8 @@ self-update
 Most common Bash date commands for timestamping
 https://zxq9.com/archives/795
 
+git clone https://github.com/dmyers2004/deploy.git ./deploy;chmod 755 ./deploy
+
 */
 
 ini_set('memory_limit','512M');
@@ -43,13 +45,15 @@ $task_name = implode(' ',$argv);
 
 /* if the task doesn't show all available tasks and their help */
 if (!$deploy->task_exists($task_name)) {
-	$deploy->e('<red>Task "'.$task_name.'" is not defined.</red>');
+	if (!empty($task_name)) {
+		$deploy->e('<red>Task "'.$task_name.'" is not defined.</red>');
+	}
 
 	/* so we can format everything nice like */
 	$length = 0;
 
 	$descriptions = $deploy->get_help($length);
-
+	
 	$deploy->e('<orange>Available Tasks:</orange>');
 
 	foreach ($descriptions as $task_name=>$desc) {
@@ -235,7 +239,7 @@ class deploy {
 		$array = [];
 
 		if (!file_exists($deploy_filename)) {
-			error('Could not locate '.getcwd().'/deploy.json file',false);
+			$this->error('Could not locate '.getcwd().'/deploy.json file',false);
 		} else {
 			$this->heading('Using Deploy File '.getcwd().'/deploy.json');
 
