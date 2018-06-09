@@ -20,7 +20,9 @@ $config = [
 
 $deploy = new deploy($config);
 
-exit($deploy->options()->process());
+$deploy->options()->process();
+
+exit();
 
 /* finished */
 
@@ -39,6 +41,14 @@ class deploy {
 		$this->heading('Deploy Version '.$this->config['version']);
 
 		$this->env = $this->config['env'];
+
+		set_error_handler(function($errno, $errstr, $errfile, $errline) {
+			if ($errno == 1024) {
+				$this->error($errstr);
+			
+				exit(6);
+			}
+		});
 	}
 
 	public function options() {
@@ -139,7 +149,7 @@ class deploy {
 			$exit_code = $this->cli($command);
 
 			if ($exit_code > 0) {
-				$this->error('Exit Code '.$exit_code);
+				trigger_error('Command Exit Exception '.$exit_code);
 			}
 		}
 	}
@@ -184,12 +194,10 @@ class deploy {
 		if ($found > 0) {
 			foreach ($matches as $match) {
 				if (!isset($this->env[$match[1]])) {
-					$this->error('Missing Merge Key for {'.$match[1].'}');
+					trigger_error('Missing Merge Key for {'.$match[1].'}');
+				} else {
+					$input = str_replace('{'.$match[1].'}',$this->env[$match[1]],$input);
 				}
-			}
-
-			foreach ($this->env as $key=>$val) {
-				$input = str_replace('{'.$key.'}',$val,$input);
 			}
 		}
 
@@ -237,9 +245,7 @@ class deploy {
 			$array = json_decode(file_get_contents($this->config['deploy_file']));
 
 			if ($array === null) {
-				$this->error($this->config['deploy_file'].' malformed');
-
-				$array = [];
+				trigger_error($this->config['deploy_file'].' malformed');
 			}
 		}
 
@@ -378,13 +384,13 @@ class deploy {
 		if (method_exists($this,$m.'_'.$method)) {
 			call_user_func_array([$this,$m.'_'.$method],$args);
 		} else {
-			$this->error($m.' function '.$method.' is not found');
+			trigger_error($m.' function '.$method.' is not found');
 		}
 	}
 
 	public function gitx_update($path=null,$branch=null) {
 		if (!$branch) {
-			$this->error('GIT Branch not specified please provide one');
+			trigger_error('GIT Branch not specified please provide one');
 		}
 
 		$this->directory_exists($path);
@@ -452,7 +458,7 @@ class deploy {
 
 	public function task($task_name) {
 		if (!$this->task_exists($task_name)) {
-			$this->error("Task \"$task_name\" Not Found.");
+			trigger_error('Task "'.$task_name.'" Not Found.');
 		}
 
 		$this->current_task = $task_name;
@@ -468,7 +474,7 @@ class deploy {
 		$return = false;
 
 		if (!in_array($filetype,['json','ini','yaml','array'])) {
-			$this->error($filetype.' is a unsupported import type.');
+			trigger_error($filetype.' is a unsupported import type.');
 		}
 
 		$this->file_exists($filepath);
@@ -484,7 +490,7 @@ class deploy {
 			break;
 			case 'yaml':
 				if (!function_exists('yaml_parse_file')) {
-					$this->error('yaml_parse_file() not found. Please verify you have the YAML PECL extension installed.');
+					trigger_error('yaml_parse_file() not found. Please verify you have the YAML PECL extension installed.');
 				}
 
 				$array = yaml_parse_file($filepath);
@@ -499,7 +505,7 @@ class deploy {
 				$this->env[$name] = $value;
 			}
 		} else {
-			$this->error('Your input file did return a Array.');
+			trigger_error('Your input file did return a Array.');
 		}
 	}
 
@@ -511,7 +517,7 @@ class deploy {
 		$this->e('<blue># '.$txt.'</blue>');
 	}
 
-	public function error($txt,$exit=true) {
+	public function error($txt) {
 		$this->e('<red>'.str_pad('> '.$txt.' ',exec('tput cols'),'<',STR_PAD_RIGHT).'</red>');
 
 		if ($this->current_task) {
@@ -520,10 +526,6 @@ class deploy {
 
 		if ($this->current_line) {
 			$this->e('<red>    - Command:  </off>'.$this->current_line);
-		}
-
-		if ($exit) {
-			exit(6);
 		}
 	}
 
@@ -539,7 +541,7 @@ class deploy {
 
 	public function file_exists($path,$extra='file ') {
 		if (!file_exists($path)) {
-			$this->error('Could not locate '.$extra.$path);
+			trigger_error('Could not locate '.$extra.$path);
 		}
 	}
 
