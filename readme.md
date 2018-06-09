@@ -75,7 +75,6 @@ selfupdate or self-update - automatically download and update this  deploy scrip
   ],
   "add access": [
     "// % Auto add the permissions to the orange permissions db table.",
-    "@sudo on",
     "cd {PWD}/public;php index.php cli/auto_add_permissions"
   ],
   "repair": [
@@ -112,7 +111,7 @@ selfupdate or self-update - automatically download and update this  deploy scrip
   ],
   "git update": [
     "// % Fetch and Reset all git Modules.",
-    "@sudo on",
+		"import {PWD}\.env",
     "#git_update {PWD} {GIT_BRANCH}",
     "#git_update {PWD}/packages/projectorangebox/orange {GIT_BRANCH}",
     "#git_update {PWD}/packages/projectorangebox/register {GIT_BRANCH}",
@@ -125,26 +124,21 @@ selfupdate or self-update - automatically download and update this  deploy scrip
   ],
   "git basic update": [
     "// % Fetch and Reset the basic git Modules.",
-    "@sudo on",
+		"import {PWD}\.env",
     "#git_update {PWD} {GIT_BRANCH}",
     "#git_update {PWD}/packages/projectorangebox/orange {GIT_BRANCH}",
     "#git_update {PWD}/packages/projectorangebox/theme-orange {GIT_BRANCH}",
   ],
   "git status": [
     "// % Show the GIT branches of the projects git folders.",
-    "@sudo on",
     "#git_status {PWD}"
-  ],
-  "git find": [
-    "// % Show the GIT folders in the project.",
-    "@sudo on",
-    "#show_git_repros {PWD}"
   ],
   "complete database backup": [
     "// % Backup the entire database.",
     "@sudo on",
     "mkdir -p {PWD}/support/backups",
     "chmod -f 777 {PWD}/support/backups",
+		"import {PWD}\.env",
     "capture FILE_DATE 'date +%F_%T'
     "mysqldump --extended-insert=FALSE --add-drop-table --add-drop-trigger --create-options --password={DB_BACKUP_PASSWORD} --events --routines --single-transaction --triggers --user={DB_BACKUP_USER} --databases {DB_BACKUP_DATABASE} | gzip -9 > {PWD}/support/backups/{FILE_DATE}.{DB_BACKUP_DATABASE}.sql.gz"
   ],
@@ -153,6 +147,7 @@ selfupdate or self-update - automatically download and update this  deploy scrip
     "@sudo on",
     "mkdir -p {PWD}/support/backups",
     "chmod -f 777 {PWD}/support/backups",
+		"import {PWD}\.env",
     "capture FILE_DATE 'date +%F_%T'
     "mysqldump --extended-insert=FALSE --add-drop-table --password={DB_BACKUP_PASSWORD} --user={DB_BACKUP_USER} --databases {DB_BACKUP_DATABASE} | gzip -9 > {PWD}/support/backups/{FILE_DATE}.data.{DB_BACKUP_DATABASE}.sql.gz"
   ],
