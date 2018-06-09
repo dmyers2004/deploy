@@ -174,10 +174,10 @@ selfupdate or self-update - automatically download and update this  deploy scrip
 		"task 'complete database backup'",
 		"task 'site down'",
 		"task 'git update'",
-		"task 'repair'",
+		"task repair",
 		"task 'clear caches'",
 		"task 'clear sessions'",
-		"task 'relink'",
+		"task relink",
 		"task 'site up'",
 		"task 'git status'"
 	],
@@ -185,9 +185,9 @@ selfupdate or self-update - automatically download and update this  deploy scrip
 		"// % Run Basic Site Update.",
 		"task 'backup database data'",
 		"task 'git basic update'",
-		"task 'repair'",
+		"task repair",
 		"task 'clear caches'",
-		"task 'relink'",
+		"task relink",
 		"task 'git status'"
 	]
 }
