@@ -1,14 +1,23 @@
-# deploy
+# Deploy
 
-Deploy is used to build project specific deploy "tasks". Each task can have 1 or more shell script commands as well as call other tasks.
+Deploy is used to build project specific deploy "tasks". Each task can have one or more shell script commands as well as call other tasks.
 
-All of the available deploy classes methods are also available for you to call.
+## Options include
 
-Some of these include:
+-v verbose
+-f use a different deploy file
+-d use a different directory
+
+
+## Included methods
 
 e - echo with color `e '<yellow>This is yellow</yellow> this is not'`
 
+v - verbose output which is shown only if the verbose option is used `v 'hello world'`
+
 heading - heading `heading 'This is a heading'`
+
+sub_heading - heading `sub_heading 'This is a sub heading'`
 
 table_heading - a table heading with columns  `table_heading 'First Name' 32 'Last Name' 32 Age 4`
 
@@ -26,12 +35,9 @@ capture - capture shell script output into a deploy merge variable `capture vari
 
 task - run another task inside the current task `task 'repair files'`
 
-
 // Comment `// do something`
 
 // % Comment used for the tasks description `// % backup database`
-
-
 
 ## Switches
 
@@ -46,7 +52,14 @@ selfupdate or self-update - automatically download and update this  deploy scrip
 {
 	"testing": [
 		"// % Create Symbolic links between package folders and public folders.",
-		"@sudo on",
+		"// @sudo on",
+		"import array {PWD}/.env",
+		"gitx update {PWD} {BRANCH}",
+		"import ini {PWD}/env.ini",
+		"e '{StatusPort}'",
+		"import json {PWD}/env.json",
+		"e '{color}'",
+		"e '<green>{mary}</green>'",
 		"e '<yellow>Testing</yellow>'",
 		"rm -f {PWD}/testing",
 		"mkdir -p {PWD}/testing/bin",
@@ -112,26 +125,30 @@ selfupdate or self-update - automatically download and update this  deploy scrip
 	"git update": [
 		"// % Fetch and Reset all git Modules.",
 		"import array {PWD}/.env",
-		"#git_update {PWD} {GIT_BRANCH}",
-		"#git_update {PWD}/packages/projectorangebox/orange {GIT_BRANCH}",
-		"#git_update {PWD}/packages/projectorangebox/register {GIT_BRANCH}",
-		"#git_update {PWD}/packages/projectorangebox/remember {GIT_BRANCH}",
-		"#git_update {PWD}/packages/projectorangebox/theme-orange {GIT_BRANCH}",
-		"#git_update {PWD}/packages/projectorangebox/tooltips {GIT_BRANCH}",
-		"#git_update {PWD}/packages/backorder",
-		"#git_update {PWD}/packages/drop-ships",
-		"#git_update {PWD}/packages/stock-status-check"
+		"gitx update {PWD} {GIT_BRANCH}",
+		"gitx update {PWD}/packages/projectorangebox/orange {GIT_BRANCH}",
+		"gitx update {PWD}/packages/projectorangebox/register {GIT_BRANCH}",
+		"gitx update {PWD}/packages/projectorangebox/remember {GIT_BRANCH}",
+		"gitx update {PWD}/packages/projectorangebox/theme-orange {GIT_BRANCH}",
+		"gitx update {PWD}/packages/projectorangebox/tooltips {GIT_BRANCH}",
+		"gitx update {PWD}/packages/backorder {GIT_BRANCH}",
+		"gitx update {PWD}/packages/drop-ships {GIT_BRANCH}",
+		"gitx update {PWD}/packages/stock-status-check {GIT_BRANCH}"
 	],
 	"git basic update": [
 		"// % Fetch and Reset the basic git Modules.",
 		"import array {PWD}/.env",
-		"#git_update {PWD} {GIT_BRANCH}",
-		"#git_update {PWD}/packages/projectorangebox/orange {GIT_BRANCH}",
-		"#git_update {PWD}/packages/projectorangebox/theme-orange {GIT_BRANCH}"
+		"gitx update {PWD} {GIT_BRANCH}",
+		"gitx update {PWD}/packages/projectorangebox/orange {GIT_BRANCH}",
+		"gitx update {PWD}/packages/projectorangebox/theme-orange {GIT_BRANCH}"
 	],
 	"git status": [
 		"// % Show the GIT branches of the projects git folders.",
-		"#git_status {PWD}"
+		"gitx status {PWD}"
+	],
+	"git generate": [
+		"// % Display all of the GIT repositories in your project",
+		"gitx generate {PWD}"
 	],
 	"complete database backup": [
 		"// % Backup the entire database.",
