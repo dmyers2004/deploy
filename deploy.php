@@ -44,7 +44,15 @@ class deploy {
 
 		set_error_handler(function($errno, $errstr, $errfile, $errline) {
 			if ($errno == 1024) {
-				$this->error($errstr);
+				$this->e('<red>'.str_pad('> '.$errstr.' ',exec('tput cols'),'<',STR_PAD_RIGHT).'</red>');
+		
+				if ($this->current_task) {
+					$this->e('<red>    - Task: </off>'.$this->current_task);
+				}
+		
+				if ($this->current_line) {
+					$this->e('<red>    - Command:  </off>'.$this->current_line);
+				}
 			
 				exit(6);
 			}
@@ -115,7 +123,7 @@ class deploy {
 		/* if the task doesn't show all available tasks and their help */
 		if (!$this->task_exists($task_name)) {
 			if (!empty($task_name)) {
-				$this->e('<red>Task "'.$task_name.'" is not defined.</red>');
+				$this->e('<light_red>Task "'.$task_name.'" is not defined.</off>');
 			}
 			$this->table($this->get_help());
 		} else {
@@ -238,7 +246,7 @@ class deploy {
 		$array = [];
 
 		if (!file_exists($this->config['deploy_file'])) {
-			$this->error('Could not locate '.$this->config['deploy_file'].' file',false);
+			$this->e('<light_red>** Could not locate '.$this->config['deploy_file'].' file');
 		} else {
 			$this->sub_heading('Using Deploy File '.$this->config['deploy_file']);
 
@@ -396,7 +404,7 @@ class deploy {
 		$this->directory_exists($path);
 
 		if (!file_exists($path.'/.git')) {
-			$this->e('<red>Not a GIT repository '.$path.'.</off>');
+			trigger_error('Not a GIT repository '.$path);
 		} else {
 			$this->v('cd '.$path.';git fetch --all;git reset --hard origin/'.$branch);
 
@@ -515,18 +523,6 @@ class deploy {
 
 	public function sub_heading($txt) {
 		$this->e('<blue># '.$txt.'</blue>');
-	}
-
-	public function error($txt) {
-		$this->e('<red>'.str_pad('> '.$txt.' ',exec('tput cols'),'<',STR_PAD_RIGHT).'</red>');
-
-		if ($this->current_task) {
-			$this->e('<red>    - Task: </off>'.$this->current_task);
-		}
-
-		if ($this->current_line) {
-			$this->e('<red>    - Command:  </off>'.$this->current_line);
-		}
 	}
 
 	public function e($txt) {
