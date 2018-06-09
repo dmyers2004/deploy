@@ -28,13 +28,15 @@ ini_set('memory_limit','512M');
 ini_set('display_errors', 1);
 error_reporting(E_ALL ^ E_NOTICE);
 
-define('VERSION','4.0');
-define('FILENAME','deploy.json');
+$config = [
+	'version'=>'4.0.0',
+	'deploy_filename'=>'deploy.json',
+	'rootpath'=>getcwd(),
+	'env'=>$_SERVER + $_ENV,
+	'args'=>$_SERVER['argv'],
+];
 
-define('ROOTPATH',realpath($_SERVER['PWD'])); /* path to the folder we are in now */
-define('SCRIPTPATH',realpath(dirname(__FILE__))); /* path to this scripts folder */
-
-$deploy = new deploy($_SERVER,$_ENV,$_SERVER['argv']);
+$deploy = new deploy($config);
 
 /* get the cli arguments */
 $argv = $_SERVER['argv'];
@@ -64,13 +66,19 @@ class deploy {
 	public $env = [];
 	public $deploy_json = [];
 	public $switch_storage = [];
+	public $config;
+	public $current_task = null;
+	public $current_line = null;
+	
 
-	public function __construct($server,$env,$args) {
-		$this->env = $server + $env;
+	public function __construct($config) {
+		$this->config = $config;
+
+		$this->heading('Deploy Version '.$this->config['version']);
+
+		$this->env = $this->config['env'];
 
 		$this->deploy_json = array_merge($this->get_hard_actions(),$this->get_deploy());
-
-		$this->heading('Deploy Version '.VERSION);
 	}
 
 	public function run($command) {
@@ -120,75 +128,23 @@ class deploy {
 		echo $this->color($txt).chr(10);
 	}
 
-	public function heading($txt,$pad='-') {
+	public function heading($txt) {
 		$this->e('<cyan>'.str_pad('- '.$txt.' ',exec('tput cols'),'-',STR_PAD_RIGHT).'</cyan>');
 	}
 
+	public function sub_heading($txt) {
+		$this->e('<blue># '.$txt.'</blue>');
+	}
+
 	public function error($txt,$exit=true) {
-		$this->e('<red>'.str_pad('* '.$txt.' ',exec('tput cols'),'*',STR_PAD_RIGHT).'</red>');
+		$this->e('<red>'.str_pad('> '.$txt.' ',exec('tput cols'),'<',STR_PAD_RIGHT).'</red>');
+
+		$this->e('<red>    - Task: </off>'.$this->current_task);
+		$this->e('<red>    - Command:  </off>'.$this->current_line);
 
 		if ($exit) {
 			exit(6);
 		}
-	}
-
-	public function table($table) {
-		$widths = [];
-
-		foreach ($table as $tr) {
-			foreach ($tr as $idx=>$td) {
-				$widths[$idx] = max(strlen($td)+2,$widths[$idx]);
-			}
-		}
-
-		$table_with_widths = [];
-
-		foreach ($table as $tr) {
-			$new_row = [];
-			
-			foreach ($tr as $idx=>$td) {
-				$new_row[$td] = $widths[$idx];
-			}
-			
-			$table_with_widths[] = $new_row;
-		}
-
-		$this->table_heading(array_shift($table_with_widths));
-		
-		foreach ($table_with_widths as $row) {
-			$this->table_columns($row);
-		}
-	}
-
-	public function table_heading($kv=null) {
-		$kv = ($kv) ? $kv : $this->table_key_value_set(func_get_args());
-
-		foreach ($kv as $text=>$width) {
-			echo $this->color('<yellow>'.str_pad($text,$width,' ',STR_PAD_RIGHT).' </yellow>');
-		}
-
-		echo chr(10);
-	}
-
-	public function table_columns($kv=null) {
-		$kv = ($kv) ? $kv : $this->table_key_value_set(func_get_args());
-
-		foreach ($kv as $text=>$width) {
-			echo $this->color(str_pad($text,$width,' ',STR_PAD_RIGHT).' ');
-		}
-
-		echo chr(10);
-	}
-
-	public function table_key_value_set($input) {
-		$count = count($input);
-		$array = [];
-
-		for ($i = 0; $i < $count; $i++) {
-			$array[$input[$i]] = $input[++$i];
-		}
-
-		return $array;
 	}
 
 	public function merge($input) {
@@ -242,36 +198,61 @@ class deploy {
 		return $input;
 	}
 
-	public function import($type,$filepath) {
+	public function import($filetype,$filepath) {
 		$return = false;
 
-		if (!file_exists($filepath)) {
-			$this->error('Could not locate '.$filepath.' file',false);
-		} else {
-			$this->heading('Importing '.$filepath);
-
-			$return = require $filepath;
+		if (!in_array($filetype,['json','ini','yaml','array'])) {
+			$this->error($filetype.' is a unsupported import type.');
 		}
 
-		if (is_array($return)) {
-			$this->env = $this->env + $return;
+		if (!file_exists($filepath)) {
+			$this->error('Import could not locate '.$filepath);
+		} else {
+			$this->sub_heading('Importing '.$filepath);
+		}
+
+		switch($filetype) {
+			case 'ini':
+				$array = parse_ini_file($filepath);
+			break;
+			case 'array':
+				$array = require $filepath;
+			break;
+			case 'yaml':
+				if (!function_exists('yaml_parse_file')) {
+					$this->error('yaml_parse_file() not found. Please verify you have the YAML PECL extension installed.');
+				}
+			
+				$array = yaml_parse_file($filepath);
+			break;
+			case 'json':
+				$array = json_decode(file_get_contents($filepath),true);
+			break;
+		}
+
+		if (is_array($array)) {
+			foreach ($array as $name => $value){
+				$this->env[$name] = $value;
+			}
+		} else {
+			$this->error('Your input file did return a Array.');
 		}
 	}
 
 	public function get_deploy() {
-		$deploy_filename = getcwd().'/'.FILENAME;
+		$deploy_filename = getcwd().'/'.$this->config['deploy_filename'];
 
 		$array = [];
 
 		if (!file_exists($deploy_filename)) {
-			$this->error('Could not locate '.getcwd().'/'.FILENAME.' file',false);
+			$this->error('Could not locate '.getcwd().'/'.$this->config['deploy_filename'].' file',false);
 		} else {
-			$this->heading('Using Deploy File '.getcwd().'/'.FILENAME);
+			$this->sub_heading('Using Deploy File '.getcwd().'/'.$this->config['deploy_filename']);
 
 			$array = json_decode(file_get_contents($deploy_filename));
 
 			if ($array === null) {
-				$this->error(FILENAME.' malformed',false);
+				$this->error($this->config['deploy_filename'].' malformed');
 
 				$array = [];
 			}
@@ -297,7 +278,7 @@ class deploy {
 
 	public function get_help() {
 		$rows = [];
-		
+
 		foreach ($this->deploy_json as $key=>$values) {
 			foreach ((array)$values as $value) {
 				if (substr($value,0,4) == '// %') {
@@ -328,10 +309,6 @@ class deploy {
 		return proc_close($proc);
 	}
 
-	public function task_exists($task_name) {
-		return (array_key_exists($task_name,$this->deploy_json));
-	}
-
 	/** @ switches */
 
 	public function switch_sudo($switch) {
@@ -348,27 +325,29 @@ class deploy {
 
 	/** add-on commands */
 
-	public function xgit($action,$path,$branch=null) {
-		switch($action) {
-			case 'update':
-				$this->xgit_update($path,$branch);
-			break;
-			case 'status':
-				$this->xgit_status($path);
-			break;
-			case 'find':
-				$this->xgit_find($path);
-			break;
+	public function gitx() {
+		$m = __FUNCTION__;
+		$args = func_get_args();
+		$method = array_shift($args);
+	
+		if (method_exists($this,$m.'_'.$method)) {
+			call_user_func_array([$this,$m.'_'.$method],$args);
+		} else {
+			$this->error($m.' function '.$method.' is not found');	
 		}
 	}
 
-	public function xgit_update($path,$branch) {
-		if (empty($branch)) {
-			$this->error('GIT Branch not specified please provide GITBRANCH');
+	public function gitx_update($path=null,$branch=null) {
+		if (!$branch) {
+			$this->error('GIT Branch not specified please provide one');
+		}
+
+		if (!file_exists($path)) {
+			$this->e('<red>Could not locate directory '.$path.'.</off>');
 		}
 
 		if (!file_exists($path.'/.git')) {
-			$this->e('<red>Not a git folder '.$path.'.</off>');
+			$this->e('<red>Not a GIT repository '.$path.'.</off>');
 		} else {
 			$this->e('cd '.$path.';git fetch --all;git reset --hard origin/'.$branch);
 
@@ -376,10 +355,14 @@ class deploy {
 		}
 	}
 
-	public function xgit_status($path) {
+	public function gitx_status($path=null) {
+		if (!file_exists($path)) {
+			$this->e('<red>Could not locate directory '.$path.'.</off>');
+		}
+		
 		exec('find '.$path.' -name FETCH_HEAD',$output);
 
-		$this->table_heading(['Package'=>32,'Branch'=>16,'Hash'=>42]);
+		$table[] = ['Package','Branch','Hash'];
 
 		foreach ($output as $o) {
 			$dirname = dirname(dirname($o));
@@ -390,15 +373,25 @@ class deploy {
 			$sections = explode('/',$dirname);
 			$package = end($sections);
 
-			$this->table_columns($package,$branch,$hash);
+			$table[] = [$package,$branch,$hash];
 		}
+
+		$this->table($table);
 	}
 
-	public function xgit_find($path) {
+	public function gitx_generate($path=null) {
+		if (!file_exists($path)) {
+			$this->e('<red>Could not locate directory '.$path.'.</off>');
+		}
+
 		exec('find '.$path.' -name FETCH_HEAD',$output);
 
+		/* xgit update {PWD} {GIT_BRANCH} */
 		foreach ($output as $o) {
-			$this->e(str_replace(ROOTPATH,'{PWD}',dirname(dirname($o))));
+			$string = 'xgit update # {GIT_BRANCH}';
+			$relative = str_replace($this->config['rootpath'],'{PWD}',dirname(dirname($o)));
+
+			$this->e(str_replace('#',$relative,$string));
 		}
 	}
 
@@ -419,13 +412,21 @@ class deploy {
 	}
 
 	public function task($task_name) {
-		if (!isset($this->deploy_json[$task_name])) {
+		if (!$this->task_exists($task_name)) {
 			$this->error("Task \"$task_name\" Not Found.");
 		}
 
+		$this->current_task = $task_name;
+
 		foreach ($this->deploy_json[$task_name] as $command) {
+			$this->current_line = $command;
+			
 			$exit_code = $this->run($command);
 		}
+	}
+
+	public function task_exists($task_name) {
+		return (array_key_exists($task_name,$this->deploy_json));
 	}
 
 	public function selfupdate() {
@@ -437,10 +438,69 @@ class deploy {
 
 		exec('sudo rm -fdrv /tmp/deploy');
 		exec('sudo git clone https://github.com/dmyers2004/deploy.git /tmp/deploy');
-		exec('sudo mv /tmp/deploy/deploy.php '.SCRIPTPATH.'/deploy');
-		exec('sudo chmod -v 755 '.SCRIPTPATH.'/deploy');
+		exec('sudo mv /tmp/deploy/deploy.php '.__FILE__);
+		exec('sudo chmod -v 755 '.__FILE__);
 
-		$this->heading('Update Complete');
+		$this->sub_heading('Update Complete');
+	}
+
+	public function table($table) {
+		$widths = [];
+
+		foreach ($table as $tr) {
+			foreach ($tr as $idx=>$td) {
+				$widths[$idx] = max(strlen($td)+2,$widths[$idx]);
+			}
+		}
+
+		$table_with_widths = [];
+
+		foreach ($table as $tr) {
+			$new_row = [];
+
+			foreach ($tr as $idx=>$td) {
+				$new_row[$td] = $widths[$idx];
+			}
+
+			$table_with_widths[] = $new_row;
+		}
+
+		$this->table_heading(array_shift($table_with_widths));
+
+		foreach ($table_with_widths as $row) {
+			$this->table_columns($row);
+		}
+	}
+
+	public function table_heading($kv=null) {
+		$kv = ($kv) ? $kv : $this->table_key_value_set(func_get_args());
+
+		foreach ($kv as $text=>$width) {
+			echo $this->color('<yellow>'.str_pad($text,$width,' ',STR_PAD_RIGHT).' </yellow>');
+		}
+
+		echo chr(10);
+	}
+
+	public function table_columns($kv=null) {
+		$kv = ($kv) ? $kv : $this->table_key_value_set(func_get_args());
+
+		foreach ($kv as $text=>$width) {
+			echo $this->color(str_pad($text,$width,' ',STR_PAD_RIGHT).' ');
+		}
+
+		echo chr(10);
+	}
+
+	public function table_key_value_set($input) {
+		$count = count($input);
+		$array = [];
+
+		for ($i = 0; $i < $count; $i++) {
+			$array[$input[$i]] = $input[++$i];
+		}
+
+		return $array;
 	}
 
 } /* end class */

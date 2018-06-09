@@ -14,11 +14,11 @@ table_heading - a table heading with columns  `table_heading 'First Name' 32 'La
 
 table_column - a table column `table_columns Don 32 Appleseed 32 21 4`
 
-import - import a file in the merge scope. supported types include array, env, ini `import array {PWD}\.env`
+import - import a file in the merge scope. supported types include array, yaml, json, ini `import array {PWD}\.env`
 
-xgit update - extended git (xgit) command to simplify a git update based on a branch `xgit update {PWD}/path {GIT_BRANCH}`
+gitx update - extended git (gitx) command to simplify a git update based on a branch `gitx update {PWD}/path {GIT_BRANCH}`
 
-xgit status extended git (xgit) command to view the branch of all git repositories `xgit status {PWD}/path`
+gitx status extended git (gitx) command to view the branch of all git repositories `gitx status {PWD}/path`
 
 set - sets a deploy merge variable `set username 'Johnny Appleseed'`
 
