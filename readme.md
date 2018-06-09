@@ -5,7 +5,9 @@ Deploy is used to build project specific deploy "tasks". Each task can have one 
 ## Options include
 
 -v verbose
+
 -f use a different deploy file
+
 -d use a different directory
 
 
