@@ -29,6 +29,7 @@ ini_set('display_errors', 1);
 error_reporting(E_ALL ^ E_NOTICE);
 
 define('VERSION','4.0');
+define('FILENAME','deploy.json');
 
 define('ROOTPATH',realpath($_SERVER['PWD'])); /* path to the folder we are in now */
 define('SCRIPTPATH',realpath(dirname(__FILE__))); /* path to this scripts folder */
@@ -48,17 +49,7 @@ if (!$deploy->task_exists($task_name)) {
 	if (!empty($task_name)) {
 		$deploy->e('<red>Task "'.$task_name.'" is not defined.</red>');
 	}
-
-	/* so we can format everything nice like */
-	$length = 0;
-
-	$descriptions = $deploy->get_help($length);
-	
-	$deploy->e('<orange>Available Tasks:</orange>');
-
-	foreach ($descriptions as $task_name=>$desc) {
-		$deploy->e('<green>'.str_pad($task_name,$length).'</green>'.$desc);
-	}
+	$deploy->table($deploy->get_help());
 } else {
 	$deploy->task($task_name);
 }
@@ -78,14 +69,14 @@ class deploy {
 		$this->env = $server + $env;
 
 		$this->deploy_json = array_merge($this->get_hard_actions(),$this->get_deploy());
-		
+
 		$this->heading('Deploy Version '.VERSION);
 	}
 
 	public function run($command) {
 		/* smart explode (don't break on spaces inside single quotes) */
 		$args = str_getcsv(str_replace(chr(39),chr(34),$command),chr(32),chr(34));
-		
+
 		/* function names since they are php methods/functions can't have dashes */
 		$function = str_replace('-','_',$args[0]);
 
@@ -141,18 +132,46 @@ class deploy {
 		}
 	}
 
-	public function table_heading() {
-		$kv = $this->table_key_value_set(func_get_args());
+	public function table($table) {
+		$widths = [];
+
+		foreach ($table as $tr) {
+			foreach ($tr as $idx=>$td) {
+				$widths[$idx] = max(strlen($td)+2,$widths[$idx]);
+			}
+		}
+
+		$table_with_widths = [];
+
+		foreach ($table as $tr) {
+			$new_row = [];
+			
+			foreach ($tr as $idx=>$td) {
+				$new_row[$td] = $widths[$idx];
+			}
+			
+			$table_with_widths[] = $new_row;
+		}
+
+		$this->table_heading(array_shift($table_with_widths));
+		
+		foreach ($table_with_widths as $row) {
+			$this->table_columns($row);
+		}
+	}
+
+	public function table_heading($kv=null) {
+		$kv = ($kv) ? $kv : $this->table_key_value_set(func_get_args());
 
 		foreach ($kv as $text=>$width) {
 			echo $this->color('<yellow>'.str_pad($text,$width,' ',STR_PAD_RIGHT).' </yellow>');
 		}
-		
+
 		echo chr(10);
 	}
 
-	public function table_columns() {
-		$kv = $this->table_key_value_set(func_get_args());
+	public function table_columns($kv=null) {
+		$kv = ($kv) ? $kv : $this->table_key_value_set(func_get_args());
 
 		foreach ($kv as $text=>$width) {
 			echo $this->color(str_pad($text,$width,' ',STR_PAD_RIGHT).' ');
@@ -164,11 +183,11 @@ class deploy {
 	public function table_key_value_set($input) {
 		$count = count($input);
 		$array = [];
-		
+
 		for ($i = 0; $i < $count; $i++) {
 			$array[$input[$i]] = $input[++$i];
 		}
-		
+
 		return $array;
 	}
 
@@ -223,7 +242,7 @@ class deploy {
 		return $input;
 	}
 
-	public function import($filepath) {
+	public function import($type,$filepath) {
 		$return = false;
 
 		if (!file_exists($filepath)) {
@@ -240,19 +259,19 @@ class deploy {
 	}
 
 	public function get_deploy() {
-		$deploy_filename = getcwd().'/deploy.json';
+		$deploy_filename = getcwd().'/'.FILENAME;
 
 		$array = [];
 
 		if (!file_exists($deploy_filename)) {
-			$this->error('Could not locate '.getcwd().'/deploy.json file',false);
+			$this->error('Could not locate '.getcwd().'/'.FILENAME.' file',false);
 		} else {
-			$this->heading('Using Deploy File '.getcwd().'/deploy.json');
+			$this->heading('Using Deploy File '.getcwd().'/'.FILENAME);
 
 			$array = json_decode(file_get_contents($deploy_filename));
 
 			if ($array === null) {
-				$this->error('deploy.json malformed',false);
+				$this->error(FILENAME.' malformed',false);
 
 				$array = [];
 			}
@@ -276,22 +295,22 @@ class deploy {
 		');
 	}
 
-	public function get_help(&$length) {
-		$c = [];
-
+	public function get_help() {
+		$rows = [];
+		
 		foreach ($this->deploy_json as $key=>$values) {
 			foreach ((array)$values as $value) {
 				if (substr($value,0,4) == '// %') {
-					$c[$key] = trim(substr($value,4));
-
-					$length = max(strlen($key)+2,$length);
+					$rows[] = ['<green>'.$key.'</green>',trim(substr($value,4))];
 				}
 			}
 		}
 
-		ksort($c);
+		array_multisort($rows);
 
-		return $c;
+		$header[] = ['Available Tasks:',''];
+
+		return $header + $rows;
 	}
 
 	public function shell($cmd, &$stdout=null, &$stderr=null) {
@@ -312,7 +331,7 @@ class deploy {
 	public function task_exists($task_name) {
 		return (array_key_exists($task_name,$this->deploy_json));
 	}
-	
+
 	/** @ switches */
 
 	public function switch_sudo($switch) {
@@ -352,7 +371,7 @@ class deploy {
 			$this->e('<red>Not a git folder '.$path.'.</off>');
 		} else {
 			$this->e('cd '.$path.';git fetch --all;git reset --hard origin/'.$branch);
-		
+
 			$this->shell('cd '.$path.';git fetch --all;git reset --hard origin/'.$branch);
 		}
 	}
@@ -391,11 +410,11 @@ class deploy {
 		$cmd = $this->merge($this->sudo.$shell);
 		$stdout = '';
 		$stderr = '';
-	
+
 		$error_code = $this->shell($cmd,$stdout,$stderr);
-	
+
 		$this->env[$name] = $stdout;
-		
+
 		return $error_code;
 	}
 

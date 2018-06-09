@@ -14,7 +14,7 @@ table_heading - a table heading with columns  `table_heading 'First Name' 32 'La
 
 table_column - a table column `table_columns Don 32 Appleseed 32 21 4`
 
-import - import a php file which must return a PHP array. That array is merged with the "merge" variables. `import {PWD}\.env`
+import - import a file in the merge scope. supported types include array, env, ini `import array {PWD}\.env`
 
 xgit update - extended git (xgit) command to simplify a git update based on a branch `xgit update {PWD}/path {GIT_BRANCH}`
 
@@ -44,15 +44,15 @@ selfupdate or self-update - automatically download and update this  deploy scrip
 ## Sample
 ```
 {
-	"relink": [
+	"testing": [
 		"// % Create Symbolic links between package folders and public folders.",
 		"@sudo on",
-		"rm -f {PWD}/public/theme/orange",
-		"rm -f {PWD}/public/assets/backorder",
-		"rm -f {PWD}/public/assets/stock-status-check",
-		"ln -s {PWD}/packages/projectorangebox/theme-orange/public/theme/orange {PWD}/public/theme/orange",
-		"ln -s {PWD}/packages/backorder/public/assets/backorder {PWD}/public/assets/backorder",
-		"ln -s {PWD}/packages/stock-status-check/public/assets/stock-status-check {PWD}/public/assets/stock-status-check"
+		"e '<yellow>Testing</yellow>'",
+		"rm -f {PWD}/testing",
+		"mkdir -p {PWD}/testing/bin",
+		"mkdir -p {PWD}/testing/support",
+		"touch {PWD}/testing/foobar",
+		"chmod -Rf 777 {PWD}/testing"
 	],
 	"copy public": [
 		"// % Copy complete folders between package folders and public folders.",
@@ -111,7 +111,7 @@ selfupdate or self-update - automatically download and update this  deploy scrip
 	],
 	"git update": [
 		"// % Fetch and Reset all git Modules.",
-		"import {PWD}\.env",
+		"import array {PWD}/.env",
 		"#git_update {PWD} {GIT_BRANCH}",
 		"#git_update {PWD}/packages/projectorangebox/orange {GIT_BRANCH}",
 		"#git_update {PWD}/packages/projectorangebox/register {GIT_BRANCH}",
@@ -120,14 +120,14 @@ selfupdate or self-update - automatically download and update this  deploy scrip
 		"#git_update {PWD}/packages/projectorangebox/tooltips {GIT_BRANCH}",
 		"#git_update {PWD}/packages/backorder",
 		"#git_update {PWD}/packages/drop-ships",
-		"#git_update {PWD}/packages/stock-status-check",
+		"#git_update {PWD}/packages/stock-status-check"
 	],
 	"git basic update": [
 		"// % Fetch and Reset the basic git Modules.",
-		"import {PWD}\.env",
+		"import array {PWD}/.env",
 		"#git_update {PWD} {GIT_BRANCH}",
 		"#git_update {PWD}/packages/projectorangebox/orange {GIT_BRANCH}",
-		"#git_update {PWD}/packages/projectorangebox/theme-orange {GIT_BRANCH}",
+		"#git_update {PWD}/packages/projectorangebox/theme-orange {GIT_BRANCH}"
 	],
 	"git status": [
 		"// % Show the GIT branches of the projects git folders.",
@@ -138,8 +138,8 @@ selfupdate or self-update - automatically download and update this  deploy scrip
 		"@sudo on",
 		"mkdir -p {PWD}/support/backups",
 		"chmod -f 777 {PWD}/support/backups",
-		"import {PWD}\.env",
-		"capture FILE_DATE 'date +%F_%T'
+		"import {PWD}/.env",
+		"capture FILE_DATE 'date +%F_%T'",
 		"mysqldump --extended-insert=FALSE --add-drop-table --add-drop-trigger --create-options --password={DB_BACKUP_PASSWORD} --events --routines --single-transaction --triggers --user={DB_BACKUP_USER} --databases {DB_BACKUP_DATABASE} | gzip -9 > {PWD}/support/backups/{FILE_DATE}.{DB_BACKUP_DATABASE}.sql.gz"
 	],
 	"backup database data": [
@@ -147,8 +147,8 @@ selfupdate or self-update - automatically download and update this  deploy scrip
 		"@sudo on",
 		"mkdir -p {PWD}/support/backups",
 		"chmod -f 777 {PWD}/support/backups",
-		"import {PWD}\.env",
-		"capture FILE_DATE 'date +%F_%T'
+		"import array {PWD}/.env",
+		"capture FILE_DATE 'date +%F_%T'",
 		"mysqldump --extended-insert=FALSE --add-drop-table --password={DB_BACKUP_PASSWORD} --user={DB_BACKUP_USER} --databases {DB_BACKUP_DATABASE} | gzip -9 > {PWD}/support/backups/{FILE_DATE}.data.{DB_BACKUP_DATABASE}.sql.gz"
 	],
 	"migrate": [
