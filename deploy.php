@@ -43,6 +43,11 @@ array_shift($argv);
 
 $task_name = implode(' ',$argv);
 
+$deploy->table_heading('First Name',32,'Last Name',32,'Age',8);
+$deploy->table_columns('Don',32,'Myers',32,18,8);
+
+die();
+
 /* if the task doesn't show all available tasks and their help */
 if (!$deploy->task_exists($task_name)) {
 	if (!empty($task_name)) {
@@ -70,7 +75,6 @@ exit(1);
 
 class deploy {
 	public $sudo = '';
-	public $column_widths = [];
 	public $env = [];
 	public $deploy_json = [];
 	public $switch_storage = [];
@@ -143,27 +147,34 @@ class deploy {
 	}
 
 	public function table_heading() {
-		$input = func_get_args()[0];
-		$text = '';
+		$kv = $this->table_key_value_set(func_get_args());
 
-		foreach ($input as $txt=>$val) {
-			$text .= str_pad($txt,$val,' ',STR_PAD_RIGHT).' ';
-
-			$column_widths[] = $val;
+		foreach ($kv as $text=>$width) {
+			echo $this->color('<yellow>'.str_pad($text,$width,' ',STR_PAD_RIGHT).' </yellow>');
 		}
-
-		$this->e('<yellow>'.$text.'</yellow>');
+		
+		echo chr(10);
 	}
 
 	public function table_columns() {
-		$input = func_get_args();
-		$text = '';
+		$kv = $this->table_key_value_set(func_get_args());
 
-		foreach ($input as $idx=>$val) {
-			$text .= str_pad($val,$column_widths[$idx],' ',STR_PAD_RIGHT).' ';
+		foreach ($kv as $text=>$width) {
+			echo $this->color(str_pad($text,$width,' ',STR_PAD_RIGHT).' ');
 		}
 
-		$this->e($text);
+		echo chr(10);
+	}
+
+	public function table_key_value_set($input) {
+		$count = count($input);
+		$array = [];
+		
+		for ($i = 0; $i < $count; $i++) {
+			$array[$input[$i]] = $input[++$i];
+		}
+		
+		return $array;
 	}
 
 	public function merge($input) {
@@ -401,6 +412,10 @@ class deploy {
 		foreach ($this->deploy_json[$task_name] as $command) {
 			$exit_code = $this->run($command);
 		}
+	}
+
+	public function selfupdate() {
+		$this->self_update();
 	}
 
 	public function self_update() {

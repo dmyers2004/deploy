@@ -12,15 +12,13 @@ heading - heading `heading 'This is a heading'`
 
 table_heading - a table heading with columns  `table_heading 'First Name' 32 'Last Name' 32 Age 4`
 
-table_column - a table column `table_columns 'Johnny' 'AppleSeed' 21`
+table_column - a table column `table_columns Don 32 Appleseed 32 21 4`
 
 import - import a php file which must return a PHP array. That array is merged with the "merge" variables. `import {PWD}\.env`
 
-`xgit update {PWD}/path {GIT_BRANCH}`
+xgit update - extended git (xgit) command to simplify a git update based on a branch `xgit update {PWD}/path {GIT_BRANCH}`
 
-`xgit status {PWD}/path`
-
-`xgit find {PWD}/path`
+xgit status extended git (xgit) command to view the branch of all git repositories `xgit status {PWD}/path`
 
 set - sets a deploy merge variable `set username 'Johnny Appleseed'`
 
