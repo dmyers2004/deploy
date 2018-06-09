@@ -2,7 +2,7 @@
 
 Deploy is used to build project specific deploy "tasks". Each task can have 1 or more shell script commands as well as call other tasks.
 
-All of the available deploy classes methods are also avaiable for you to call.
+All of the available deploy classes methods are also available for you to call.
 
 Some of these include:
 
