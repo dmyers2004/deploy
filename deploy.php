@@ -43,11 +43,6 @@ array_shift($argv);
 
 $task_name = implode(' ',$argv);
 
-$deploy->table_heading('First Name',32,'Last Name',32,'Age',8);
-$deploy->table_columns('Don',32,'Myers',32,18,8);
-
-die();
-
 /* if the task doesn't show all available tasks and their help */
 if (!$deploy->task_exists($task_name)) {
 	if (!empty($task_name)) {
