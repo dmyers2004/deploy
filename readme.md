@@ -2,6 +2,16 @@
 
 Deploy is used to build project specific deploy "tasks". Each task can have one or more shell script commands as well as call other tasks.
 
+You can then run differnt tasks simply by adding there name
+
+```
+deploy complete
+
+deploy backup database
+
+deploy fix permissions
+```
+
 ## Options include
 
 -v verbose
