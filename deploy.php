@@ -173,10 +173,7 @@ class deploy {
 	public function self_update() {
 		$this->heading('Self Updating');
 
-		exec('rm -fdrv /tmp/deploy');
-		exec('git clone https://github.com/dmyers2004/deploy.git /tmp/deploy');
-		exec('mv /tmp/deploy/deploy.php '.__FILE__);
-		exec('chmod -v 755 '.__FILE__);
+		exec('rm -fdrv /tmp/deploy;git clone https://github.com/dmyers2004/deploy.git /tmp/deploy;mv /tmp/deploy/deploy.php '.__FILE__.';chmod -v 755 '.__FILE__);
 
 		$this->sub_heading('Complete');
 	}
