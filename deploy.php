@@ -10,7 +10,7 @@ ini_set('display_errors', 1);
 error_reporting(E_ALL ^ E_NOTICE);
 
 $config = [
-	'version'=>'4.0.0',
+	'version'=>'4.0.1',
 	'deploy_file'=>getcwd().'/deploy.json',
 	'rootpath'=>getcwd(),
 	'env'=>$_SERVER + $_ENV,
@@ -173,10 +173,10 @@ class deploy {
 	public function self_update() {
 		$this->heading('Self Updating');
 
-		exec('sudo rm -fdrv /tmp/deploy');
-		exec('sudo git clone https://github.com/dmyers2004/deploy.git /tmp/deploy');
-		exec('sudo mv /tmp/deploy/deploy.php '.__FILE__);
-		exec('sudo chmod -v 755 '.__FILE__);
+		exec('rm -fdrv /tmp/deploy');
+		exec('git clone https://github.com/dmyers2004/deploy.git /tmp/deploy');
+		exec('mv /tmp/deploy/deploy.php '.__FILE__);
+		exec('chmod -v 755 '.__FILE__);
 
 		$this->sub_heading('Complete');
 	}
