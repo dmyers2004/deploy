@@ -10,7 +10,7 @@ ini_set('display_errors', 1);
 error_reporting(E_ALL ^ E_NOTICE);
 
 $config = [
-	'version'=>'4.0.1',
+	'version'=>'4.0.2',
 	'deploy_file'=>getcwd().'/deploy.json',
 	'rootpath'=>getcwd(),
 	'env'=>$_SERVER + $_ENV,
