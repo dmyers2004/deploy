@@ -171,14 +171,14 @@ class deploy {
 	}
 
 	public function self_update() {
-		$this->heading('Updating Self');
+		$this->heading('Self Updating');
 
 		exec('sudo rm -fdrv /tmp/deploy');
 		exec('sudo git clone https://github.com/dmyers2004/deploy.git /tmp/deploy');
 		exec('sudo mv /tmp/deploy/deploy.php '.__FILE__);
 		exec('sudo chmod -v 755 '.__FILE__);
 
-		$this->sub_heading('Update Complete');
+		$this->sub_heading('Complete');
 	}
 
 	public function cli($command) {
