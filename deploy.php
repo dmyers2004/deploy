@@ -66,25 +66,21 @@ class deploy {
 		/* shift off the programs name */
 		array_shift($args);
 
-		/* find the -d change directory first so we can then handle -f different file */
-		foreach ($args as $idx=>$val) {
-			/* different directory */
-			if ($val == '-d') {
-				$dir = $args[$idx+1];
-
-				$this->directory_exists($dir);
-
-				chdir($dir);
-
-				$this->config['rootpath'] = getcwd();
-
-				unset($args[$idx],$args[$idx+1]);
-			}
-		}
-
 		/* now handle verbose and file */
 		foreach ($args as $idx=>$val) {
 			switch ($val) {
+				/* change the directory */
+				case '-d':
+					$dir = $args[$idx+1];
+	
+					$this->directory_exists($dir);
+	
+					chdir($dir);
+	
+					$this->config['rootpath'] = getcwd();
+	
+					unset($args[$idx],$args[$idx+1]);
+				break;
 				/* verbose */
 				case '-v':
 					$this->config['verbose'] = true;
@@ -241,7 +237,7 @@ class deploy {
 		$array = [];
 
 		if (!file_exists($this->config['deploy_file'])) {
-			$this->e('<light_red>** Could not locate '.$this->config['deploy_file'].' file');
+			$this->e('<light_red>** Could not locate '.$this->config['deploy_file'].' file</off>');
 		} else {
 			$this->sub_heading('Using Deploy File '.$this->config['deploy_file']);
 
@@ -282,10 +278,11 @@ class deploy {
 		}
 
 		array_multisort($rows);
+		
+		/* prepend heading */
+		array_unshift($rows,['Available Tasks:','']);
 
-		$header[] = ['Available Tasks:',''];
-
-		return $header + $rows;
+		return $rows;
 	}
 
 	public function shell($cmd, &$stdout=null, &$stderr=null) {
@@ -305,11 +302,12 @@ class deploy {
 
 	/** table */
 	public function table($table) {
+		$extra_pad = 1;
 		$widths = [];
 
 		foreach ($table as $tr) {
 			foreach ($tr as $idx=>$td) {
-				$widths[$idx] = max(strlen($td)+2,$widths[$idx]);
+				$widths[$idx] = max(strlen(strip_tags($td)) + $extra_pad,$widths[$idx]);
 			}
 		}
 
@@ -336,7 +334,7 @@ class deploy {
 		$kv = ($kv) ? $kv : $this->table_key_value_set(func_get_args());
 
 		foreach ($kv as $text=>$width) {
-			echo $this->color('<yellow>'.str_pad($text,$width,' ',STR_PAD_RIGHT).' </yellow>');
+			echo $this->paddy('<yellow>'.$text.'</yellow>',$width);
 		}
 
 		echo chr(10);
@@ -346,7 +344,7 @@ class deploy {
 		$kv = ($kv) ? $kv : $this->table_key_value_set(func_get_args());
 
 		foreach ($kv as $text=>$width) {
-			echo $this->color(str_pad($text,$width,' ',STR_PAD_RIGHT).' ');
+			echo $this->paddy($text,$width);
 		}
 
 		echo chr(10);
@@ -361,6 +359,10 @@ class deploy {
 		}
 
 		return $array;
+	}
+
+	public function paddy($input,$width) {
+		return $this->color($input).str_repeat(' ',($width - strlen(strip_tags($input))));
 	}
 
 	/** @ switches */
