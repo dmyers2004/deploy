@@ -28,7 +28,7 @@ exit();
 
 class deploy {
 	public $sudo = '';
-	public $env = [];
+	public $merge = [];
 	public $deploy_json = [];
 	public $switch_storage = [];
 	public $config = [];
@@ -40,7 +40,7 @@ class deploy {
 
 		$this->heading('Deploy Version '.$this->config['version']);
 
-		$this->env = $this->config['env'];
+		$this->merge = $this->config['env'];
 
 		set_error_handler(function($errno, $errstr, $errfile, $errline) {
 			if ($errno == 1024) {
@@ -197,14 +197,12 @@ class deploy {
 		/* find all the {???} and make sure we have keys */
 		$found = preg_match_all('/{(.+?)}/m', $input, $matches, PREG_SET_ORDER, 0);
 
-		$merge = array_change_key_case($this->env,CASE_LOWER);
-
 		if ($found > 0) {
 			foreach ($matches as $match) {
-				if (!isset($this->env[$match[1]])) {
+				if (!isset($this->merge[$match[1]])) {
 					trigger_error('Missing Merge Key for {'.$match[1].'}');
 				} else {
-					$input = str_replace('{'.$match[1].'}',$this->env[$match[1]],$input);
+					$input = str_replace('{'.$match[1].'}',$this->merge[$match[1]],$input);
 				}
 			}
 		}
@@ -449,7 +447,7 @@ class deploy {
 	}
 
 	public function set($name,$value) {
-		$this->env[$name] = $value;
+		$this->merge[$name] = $value;
 	}
 
 	public function capture($name,$shell) {
@@ -459,7 +457,7 @@ class deploy {
 
 		$error_code = $this->shell($cmd,$stdout,$stderr);
 
-		$this->env[$name] = $stdout;
+		$this->merge[$name] = $stdout;
 
 		return $error_code;
 	}
@@ -468,6 +466,8 @@ class deploy {
 		if (!$this->task_exists($task_name)) {
 			trigger_error('Task "'.$task_name.'" Not Found.');
 		}
+
+		$this->sub_heading('Task ᐷ '.$task_name);
 
 		$this->current_task = $task_name;
 
@@ -510,7 +510,7 @@ class deploy {
 
 		if (is_array($array)) {
 			foreach ($array as $name => $value){
-				$this->env[$name] = $value;
+				$this->merge[$name] = $value;
 			}
 		} else {
 			trigger_error('Your input file did return a Array.');
