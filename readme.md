@@ -1,8 +1,11 @@
 # Deploy
 
-Deploy is used to build project specific deploy "tasks". Each task can have one or more shell script commands as well as call other tasks.
+Deploy is used to provide project specific deploy "tasks".
+By default deply will look in the directory you are currently in for a deploy.json file.
 
-You can then run differnt tasks simply by adding there name
+Each task is one or more shell script commands and can also call other tasks among other built in commands.
+
+You can then run a task by simply supplying the tasks name
 
 ```
 deploy complete
@@ -12,20 +15,50 @@ deploy backup database
 deploy fix permissions
 ```
 
-## Options include
+You can also supply no task to get a list of all avaiable tasks.
 
--v verbose
+```
+> deploy
+- Deploy Version 4.0.2 ---------------------------------------------------------
+# Using Deploy File /Users/randy/Projects/webapp/deploy.json
+Available Tasks:                                                                           
+add access               Auto add the permissions to the orange permissions db table.      
+backup database data     Backup only the database data.                                    
+basic                    Run Basic Site Update.                                            
+clear caches             Delete all files in the cache, uploads, downloads folders.        
+clear sessions           Delete all files in the session folder.                           
+complete database backup Backup the entire database.                                       
+complete                 Run Complete Site Update.                                         
+copy public              Copy complete folders between package folders and public folders. 
+git basic update         Fetch and Reset the basic git Modules.                            
+git generate             Display all of the GIT repositories in your project               
+git status               Show the GIT branches of the projects git folders.                
+git update               Fetch and Reset all git Modules.                                  
+migrate                  Run migration Up.                                                 
+repair                   Repair folder permissions.                                        
+self-update              Updates deploy to the latest version.                             
+selfupdate               Updates deploy to the latest version.                             
+site down                Site Down.                                                        
+site up                  Site Up.                                                          
+testing                  Create Symbolic links between package folders and public folders. 
+```
 
--f use a different deploy file
+## Command line Options include
+
+-v verbose - show ***more*** output
+
+-f use a different deploy file 
 
 -d use a different directory
+
+`deploy -v -f ~/foobar/deploy2.json -d ~/foobar/project/folder site down`
 
 
 ## Included methods
 
 e - echo with color `e '<yellow>This is yellow</yellow> this is not'`
 
-v - verbose output which is shown only if the verbose option is used `v 'hello world'`
+v - verbose echo with color which is shown only if the verbose option is used `v 'hello world'`
 
 heading - heading `heading 'This is a heading'`
 
