@@ -43,7 +43,7 @@ site up                  Site Up.
 testing                  Create Symbolic links between package folders and public folders.
 ```
 
-## Command line Options include
+## Command Line Options
 
 `-v`	Be verbose when running commands.
 
@@ -55,7 +55,7 @@ Example using all options
 `deploy -v -f ~/foobar/deploy2.json -d ~/foobar/project/folder site down`
 
 
-## Included methods
+## Additional Commands
 
 e - Echo with color `e '<yellow>This is yellow</yellow> this is not'`
 
@@ -87,15 +87,30 @@ task - Run another task inside the current task. `task 'repair files'`
 
 ## Switches
 
-sudo on/off - automatically appends sudo in front of all commands `@sudo on` `@sudo off`
+`@sudo on` / `@sudo off` - turn on and off the feature to automatically append `sudo` in front of all commands.
 
-exit 1/0 - exit deploy with exit code `@exit 1` `@exit 0`
+`@exit 1` / `@exit 0` exit deploy script with exit code
+
+## Installation
+
+To install deploy you simply checkout the GIT repository and make it executable.
+
+You can place deploy anywhere you wish but, if you put it in a directory that is part of your PATH, you can access it globally.
+
+```
+git clone https://github.com/dmyers2004/deploy.git deploy
+chmod 755 ./deploy/deploy.php
+mv ./deploy/deploy.php /usr/local/bin/deploy
+
+```
 
 ## Self Updating
 
-selfupdate or self-update - automatically download and update this  deploy script manager
+Self updating will automatically checkout the GIT repository, make it executable and replace the deploy script which is currently running.
 
 `deploy selfupdate` `deploy self-update`
+
+
 
 ## Sample
 ```

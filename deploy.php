@@ -363,7 +363,7 @@ class deploy {
 
 	/** @ switches */
 
-	public function switch_sudo($switch) {
+	public function switch_sudo($switch='on') {
 		$switch = trim($switch);
 
 		if (!$this->switch_storage['sudo setup'] && $switch == 'on') {
@@ -375,7 +375,9 @@ class deploy {
 		$this->sudo = ($switch == 'on') ? 'sudo ' : '';
 	}
 
-	public function switch_exit($switch) {
+	public function switch_exit($switch=null) {
+		$switch = ($switch) ? trim($switch) : null;
+	
 		exit($switch);
 	}
 
