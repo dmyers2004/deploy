@@ -12,8 +12,6 @@ error_reporting(E_ALL ^ E_NOTICE);
 $config = [
 	'version'=>'4.0.2',
 	'deploy_file'=>getcwd().'/deploy.json',
-	'rootpath'=>getcwd(),
-	'env'=>$_SERVER + $_ENV,
 	'args'=>$_SERVER['argv'],
 	'verbose'=>false,
 ];
@@ -40,20 +38,20 @@ class deploy {
 
 		$this->heading('Deploy Version '.$this->config['version']);
 
-		$this->merge = $this->config['env'];
+		$this->merge = $this->config['merge'];
 
 		set_error_handler(function($errno, $errstr, $errfile, $errline) {
 			if ($errno == 1024) {
 				$this->e('<red>'.str_pad('> '.$errstr.' ',exec('tput cols'),'<',STR_PAD_RIGHT).'</red>');
-		
+
 				if ($this->current_task) {
 					$this->e('<red>    - Task: </off>'.$this->current_task);
 				}
-		
+
 				if ($this->current_line) {
 					$this->e('<red>    - Command:  </off>'.$this->current_line);
 				}
-			
+
 				exit(6);
 			}
 		});
@@ -72,13 +70,11 @@ class deploy {
 				/* change the directory */
 				case '-d':
 					$dir = $args[$idx+1];
-	
+
 					$this->directory_exists($dir);
-	
+
 					chdir($dir);
-	
-					$this->config['rootpath'] = getcwd();
-	
+
 					unset($args[$idx],$args[$idx+1]);
 				break;
 				/* verbose */
@@ -278,7 +274,7 @@ class deploy {
 		}
 
 		array_multisort($rows);
-		
+
 		/* prepend heading */
 		array_unshift($rows,['Available Tasks:','']);
 
@@ -379,6 +375,10 @@ class deploy {
 		$this->sudo = ($switch == 'on') ? 'sudo ' : '';
 	}
 
+	public function switch_exit($switch) {
+		exit($switch);
+	}
+
 	/** add-on commands */
 
 	public function gitx() {
@@ -456,7 +456,7 @@ class deploy {
 
 		$error_code = $this->shell($cmd,$stdout,$stderr);
 
-		$this->merge[$name] = $stdout;
+		$this->merge[$name] = trim($stdout);
 
 		return $error_code;
 	}

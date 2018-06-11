@@ -21,76 +21,81 @@ You can also supply no task to get a list of all avaiable tasks.
 > deploy
 - Deploy Version 4.0.2 ---------------------------------------------------------
 # Using Deploy File /Users/randy/Projects/webapp/deploy.json
-Available Tasks:                                                                           
-add access               Auto add the permissions to the orange permissions db table.      
-backup database data     Backup only the database data.                                    
-basic                    Run Basic Site Update.                                            
-clear caches             Delete all files in the cache, uploads, downloads folders.        
-clear sessions           Delete all files in the session folder.                           
-complete database backup Backup the entire database.                                       
-complete                 Run Complete Site Update.                                         
-copy public              Copy complete folders between package folders and public folders. 
-git basic update         Fetch and Reset the basic git Modules.                            
-git generate             Display all of the GIT repositories in your project               
-git status               Show the GIT branches of the projects git folders.                
-git update               Fetch and Reset all git Modules.                                  
-migrate                  Run migration Up.                                                 
-repair                   Repair folder permissions.                                        
-self-update              Updates deploy to the latest version.                             
-selfupdate               Updates deploy to the latest version.                             
-site down                Site Down.                                                        
-site up                  Site Up.                                                          
-testing                  Create Symbolic links between package folders and public folders. 
+Available Tasks:
+add access               Auto add the permissions to the orange permissions db table.
+backup database data     Backup only the database data.
+basic                    Run Basic Site Update.
+clear caches             Delete all files in the cache, uploads, downloads folders.
+clear sessions           Delete all files in the session folder.
+complete database backup Backup the entire database.
+complete                 Run Complete Site Update.
+copy public              Copy complete folders between package folders and public folders.
+git basic update         Fetch and Reset the basic git Modules.
+git generate             Display all of the GIT repositories in your project
+git status               Show the GIT branches of the projects git folders.
+git update               Fetch and Reset all git Modules.
+migrate                  Run migration Up.
+repair                   Repair folder permissions.
+self-update              Updates deploy to the latest version.
+selfupdate               Updates deploy to the latest version.
+site down                Site Down.
+site up                  Site Up.
+testing                  Create Symbolic links between package folders and public folders.
 ```
 
 ## Command line Options include
 
--v verbose - show ***more*** output
+`-v`	Be verbose when running commands.
 
--f use a different deploy file 
+`-f file`	Read this deployment file.
 
--d use a different directory
+`-d directory` Changes deploys current directory to directory.
 
+Example using all options
 `deploy -v -f ~/foobar/deploy2.json -d ~/foobar/project/folder site down`
 
 
 ## Included methods
 
-e - echo with color `e '<yellow>This is yellow</yellow> this is not'`
+e - Echo with color `e '<yellow>This is yellow</yellow> this is not'`
 
-v - verbose echo with color which is shown only if the verbose option is used `v 'hello world'`
+v - Verbose echo with color which is shown only if the verbose option is used. `v 'hello world'`
 
-heading - heading `heading 'This is a heading'`
+heading - Heading `heading 'This is a heading'`
 
-sub_heading - heading `sub_heading 'This is a sub heading'`
+sub_heading - Heading `sub_heading 'This is a sub heading'`
 
-table_heading - a table heading with columns  `table_heading 'First Name' 32 'Last Name' 32 Age 4`
+table_heading - A table heading with column widths.  `table_heading 'First Name' 32 'Last Name' 32 Age 4`
 
-table_column - a table column `table_columns Don 32 Appleseed 32 21 4`
+table_column - A table column with column widths. `table_columns Don 32 Appleseed 32 21 4`
 
-import - import a file in the merge scope. supported types include array, yaml, json, ini `import array {PWD}\.env`
+import - Import a file into merge scope. Supported types include array, yaml, json, ini `import array {PWD}\.env`
 
-gitx update - extended git (gitx) command to simplify a git update based on a branch `gitx update {PWD}/path {GIT_BRANCH}`
+gitx update - Extended git (gitx) command to simplify a git update based on a branch. `gitx update {PWD}/path {GIT_BRANCH}`
 
-gitx status extended git (gitx) command to view the branch of all git repositories `gitx status {PWD}/path`
+gitx status - Extended git (gitx) command to view the branch of all git repositories. `gitx status {PWD}/path`
 
-set - sets a deploy merge variable `set username 'Johnny Appleseed'`
+set - Sets a deploy merge variable. `set username 'Johnny Appleseed'`
 
-capture - capture shell script output into a deploy merge variable `capture variable_name 'date +%F_%T'`
+capture - Capture shell script output into a deploy merge variable. `capture variable_name 'date +%F_%T'`
 
-task - run another task inside the current task `task 'repair files'`
+task - Run another task inside the current task. `task 'repair files'`
 
-// Comment `// do something`
+// Comment. `// do something`
 
-// % Comment used for the tasks description `// % backup database`
+// % Comment used for the tasks description. `// % backup database`
 
 ## Switches
 
-sudo on/off - automatically appends sudo in front of all command line scripts `@sudo on` `@sudo off`
+sudo on/off - automatically appends sudo in front of all commands `@sudo on` `@sudo off`
+
+exit 1/0 - exit deploy with exit code `@exit 1` `@exit 0`
 
 ## Self Updating
 
 selfupdate or self-update - automatically download and update this  deploy script manager
+
+`deploy selfupdate` `deploy self-update`
 
 ## Sample
 ```
@@ -98,6 +103,7 @@ selfupdate or self-update - automatically download and update this  deploy scrip
 	"testing": [
 		"// % Create Symbolic links between package folders and public folders.",
 		"// @sudo on",
+		"capture PWD pwd",
 		"import array {PWD}/.env",
 		"gitx update {PWD} {BRANCH}",
 		"import ini {PWD}/env.ini",
@@ -115,6 +121,7 @@ selfupdate or self-update - automatically download and update this  deploy scrip
 	"copy public": [
 		"// % Copy complete folders between package folders and public folders.",
 		"@sudo on",
+		"capture PWD pwd",
 		"cp -R {PWD}/packages/projectorangebox/theme-orange/public/theme/orange {PWD}/public/theme/orange",
 		"cp -R {PWD}/packages/backorder/public/assets/backorder {PWD}/public/assets/backorder",
 		"cp -R {PWD}/packages/stock-status-check/public/assets/stock-status-check {PWD}/public/assets/stock-status-check"
@@ -122,22 +129,26 @@ selfupdate or self-update - automatically download and update this  deploy scrip
 	"clear sessions": [
 		"// % Delete all files in the session folder.",
 		"@sudo on",
+		"capture PWD pwd",
 		"rm -f {PWD}/var/sessions/*"
 	],
 	"clear caches": [
 		"// % Delete all files in the cache, uploads, downloads folders.",
 		"@sudo on",
+		"capture PWD pwd",
 		"rm -fdr {PWD}/var/cache/*",
 		"rm -fdr {PWD}/var/uploads/*",
 		"rm -fdr {PWD}/var/downloads/*"
 	],
 	"add access": [
 		"// % Auto add the permissions to the orange permissions db table.",
+		"capture PWD pwd",
 		"cd {PWD}/public;php index.php cli/auto_add_permissions"
 	],
 	"repair": [
 		"// % Repair folder permissions.",
 		"@sudo on",
+		"capture PWD pwd",
 		"mkdir -p {PWD}/bin",
 		"mkdir -p {PWD}/support",
 		"mkdir -p {PWD}/support/migrations",
@@ -169,6 +180,7 @@ selfupdate or self-update - automatically download and update this  deploy scrip
 	],
 	"git update": [
 		"// % Fetch and Reset all git Modules.",
+		"capture PWD pwd",
 		"import array {PWD}/.env",
 		"gitx update {PWD} {GIT_BRANCH}",
 		"gitx update {PWD}/packages/projectorangebox/orange {GIT_BRANCH}",
@@ -182,6 +194,7 @@ selfupdate or self-update - automatically download and update this  deploy scrip
 	],
 	"git basic update": [
 		"// % Fetch and Reset the basic git Modules.",
+		"capture PWD pwd",
 		"import array {PWD}/.env",
 		"gitx update {PWD} {GIT_BRANCH}",
 		"gitx update {PWD}/packages/projectorangebox/orange {GIT_BRANCH}",
@@ -189,24 +202,28 @@ selfupdate or self-update - automatically download and update this  deploy scrip
 	],
 	"git status": [
 		"// % Show the GIT branches of the projects git folders.",
+		"capture PWD pwd",
 		"gitx status {PWD}"
 	],
 	"git generate": [
 		"// % Display all of the GIT repositories in your project",
+		"capture PWD pwd",
 		"gitx generate {PWD}"
 	],
 	"complete database backup": [
 		"// % Backup the entire database.",
 		"@sudo on",
+		"capture PWD pwd",
 		"mkdir -p {PWD}/support/backups",
 		"chmod -f 777 {PWD}/support/backups",
-		"import {PWD}/.env",
+		"import array {PWD}/.env",
 		"capture FILE_DATE 'date +%F_%T'",
 		"mysqldump --extended-insert=FALSE --add-drop-table --add-drop-trigger --create-options --password={DB_BACKUP_PASSWORD} --events --routines --single-transaction --triggers --user={DB_BACKUP_USER} --databases {DB_BACKUP_DATABASE} | gzip -9 > {PWD}/support/backups/{FILE_DATE}.{DB_BACKUP_DATABASE}.sql.gz"
 	],
 	"backup database data": [
 		"// % Backup only the database data.",
 		"@sudo on",
+		"capture PWD pwd",
 		"mkdir -p {PWD}/support/backups",
 		"chmod -f 777 {PWD}/support/backups",
 		"import array {PWD}/.env",
@@ -215,11 +232,13 @@ selfupdate or self-update - automatically download and update this  deploy scrip
 	],
 	"migrate": [
 		"// % Run migration Up.",
+		"capture PWD pwd",
 		"cd {PWD}/public;php index.php cli/migrate/latest"
 	],
 	"site up": [
 		"// % Site Up.",
 		"@sudo on",
+		"capture PWD pwd",
 		"chmod -f 777 {PWD}/public",
 		"rm {PWD}/public/index.html",
 		"chmod -f 775 {PWD}/public"
@@ -227,6 +246,7 @@ selfupdate or self-update - automatically download and update this  deploy scrip
 	"site down": [
 		"// % Site Down.",
 		"@sudo on",
+		"capture PWD pwd",
 		"chmod -f 777 {PWD}/public",
 		"cp {PWD}/support/site_down.html {PWD}/public/index.html",
 		"chmod -f 775 {PWD}/public"
