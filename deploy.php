@@ -428,8 +428,7 @@ class deploy {
 			$branch = exec("cd ".str_replace(' ','\ ',$dirname).";git rev-parse --abbrev-ref HEAD");
 			$hash = exec("cd ".str_replace(' ','\ ',$dirname).";git rev-parse --verify HEAD");
 
-			$sections = explode('/',$dirname);
-			$package = end($sections);
+			$package = '/'.trim(str_replace(getcwd(),'',$dirname),'/');
 
 			$table[] = [$package,$branch,$hash];
 		}
