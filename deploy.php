@@ -381,7 +381,7 @@ class deploy {
 		$switch = ($switch) ? trim($switch) : null;
 
 		$this->v('switch exit '.$switch);
-	
+
 		exit($switch);
 	}
 
@@ -467,7 +467,9 @@ class deploy {
 		return $error_code;
 	}
 
-	public function task($task_name) {
+	public function task($a1='',$a2='',$a3='',$a4='',$a5='',$a6='') {
+		$task_name = trim($a1.' '.$a2.' '.$a3.' '.$a4.' '.$a5.' '.$a6);
+
 		if (!$this->task_exists($task_name)) {
 			trigger_error('Task "'.$task_name.'" Not Found.');
 		}
