@@ -10,7 +10,7 @@ ini_set('display_errors', 1);
 error_reporting(E_ALL ^ E_NOTICE);
 
 $config = [
-	'version'=>'4.0.2',
+	'version'=>'4.0.3',
 	'deploy_file'=>getcwd().'/deploy.json',
 	'args'=>$_SERVER['argv'],
 	'verbose'=>false,
@@ -428,7 +428,8 @@ class deploy {
 			$branch = exec("cd ".str_replace(' ','\ ',$dirname).";git rev-parse --abbrev-ref HEAD");
 			$hash = exec("cd ".str_replace(' ','\ ',$dirname).";git rev-parse --verify HEAD");
 
-			$package = '/'.trim(str_replace(getcwd(),'',$dirname),'/');
+			$sections = explode('/',$dirname);
+			$package = end($sections);
 
 			$table[] = [$package,$branch,$hash];
 		}
@@ -466,9 +467,7 @@ class deploy {
 		return $error_code;
 	}
 
-	public function task($a1='',$a2='',$a3='',$a4='',$a5='',$a6='') {
-		$task_name = trim($a1.' '.$a2.' '.$a3.' '.$a4.' '.$a5.' '.$a6);
-
+	public function task($task_name) {
 		if (!$this->task_exists($task_name)) {
 			trigger_error('Task "'.$task_name.'" Not Found.');
 		}
@@ -549,6 +548,16 @@ class deploy {
 
 	public function directory_exists($path) {
 		$this->file_exists($path,'directory ');
+	}
+
+	public function readline($name,$text) {
+		echo $text;
+
+		$handle = fopen("php://stdin","r");
+		$line = fgets($handle);
+		fclose($handle);
+
+		$this->merge[$name] = trim($line);
 	}
 
 } /* end class */
