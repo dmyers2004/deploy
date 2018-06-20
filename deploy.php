@@ -423,6 +423,10 @@ class deploy {
 	public function gitx_status($path=null) {
 		$this->directory_exists($path);
 
+		$output = '';
+		
+		$this->sub_heading(getcwd());
+
 		exec('find '.$path.' -name FETCH_HEAD',$output);
 
 		$table[] = ['Package','Branch','Hash'];
