@@ -426,7 +426,8 @@ class deploy {
 		$output = '';
 		
 		$this->sub_heading(getcwd());
-
+		
+		/* find all repros */
 		exec('find '.$path.' -name FETCH_HEAD',$output);
 
 		$table[] = ['Package','Branch','Hash'];
@@ -448,6 +449,7 @@ class deploy {
 	public function gitx_generate($path=null) {
 		$this->directory_exists($path);
 
+		/* find all repros */
 		exec('find '.$path.' -name FETCH_HEAD',$output);
 
 		/* xgit update {PWD} {GIT_BRANCH} */
