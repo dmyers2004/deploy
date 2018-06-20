@@ -10,7 +10,7 @@ ini_set('display_errors', 1);
 error_reporting(E_ALL ^ E_NOTICE);
 
 $config = [
-	'version'=>'4.0.3',
+	'version'=>'4.0.4',
 	'deploy_file'=>getcwd().'/deploy.json',
 	'args'=>$_SERVER['argv'],
 	'verbose'=>false,
@@ -38,8 +38,7 @@ class deploy {
 
 		$this->heading('Deploy Version '.$this->config['version']);
 
-		$this->merge = $this->config['merge'];
-
+		/* capture trigger_error() */
 		set_error_handler(function($errno, $errstr, $errfile, $errline) {
 			if ($errno == 1024) {
 				$this->e('<red>'.str_pad('> '.$errstr.' ',exec('tput cols'),'<',STR_PAD_RIGHT).'</red>');
@@ -55,9 +54,13 @@ class deploy {
 				exit(6);
 			}
 		});
+
+		/* done construct */
 	}
 
 	public function options() {
+		/* process arguments */
+
 		/* get the cli arguments */
 		$args = $this->config['args'];
 
@@ -112,13 +115,15 @@ class deploy {
 
 		$task_name = implode(' ',$this->config['args']);
 
-		/* if the task doesn't show all available tasks and their help */
+		/* if the task doesn't exist but it's not empty then show a error */
 		if (!$this->task_exists($task_name)) {
 			if (!empty($task_name)) {
 				$this->e('<light_red>Task "'.$task_name.'" is not defined.</off>');
 			}
+			/* show help in a table */
 			$this->table($this->get_help());
 		} else {
+			/* run this task */
 			$this->task($task_name);
 		}
 	}
