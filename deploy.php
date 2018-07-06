@@ -298,6 +298,14 @@ class deploy {
 		$stderr = stream_get_contents($pipes[2]);
 		fclose($pipes[2]);
 
+		if ($this->switch_storage['stdout']) {
+			echo $stdout;
+		}
+
+		if ($this->switch_storage['stderr']) {
+			echo $stderr;
+		}
+
 		return proc_close($proc);
 	}
 
@@ -388,6 +396,14 @@ class deploy {
 		$this->v('switch exit '.$switch);
 
 		exit($switch);
+	}
+	
+	public function switch_stdout($switch=null) {
+		$this->switch_storage['stdout'] = ($switch == 'on') ? true : false;
+	}
+
+	public function switch_stderr($switch=null) {
+		$this->switch_storage['stderr'] = ($switch == 'on') ? true : false;
 	}
 
 	/** add-on commands */
