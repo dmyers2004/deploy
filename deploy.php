@@ -444,12 +444,12 @@ class deploy {
 		$this->sub_heading(getcwd());
 		
 		/* find all repros */
-		exec('find '.$path.' -name FETCH_HEAD',$output);
+		exec('find '.$path.' -name .git',$output);
 
 		$table[] = ['Package','Branch','Hash'];
 
 		foreach ($output as $o) {
-			$dirname = dirname(dirname($o));
+			$dirname = dirname($o);
 
 			$branch = exec("cd ".str_replace(' ','\ ',$dirname).";git rev-parse --abbrev-ref HEAD");
 			$hash = exec("cd ".str_replace(' ','\ ',$dirname).";git rev-parse --verify HEAD");
@@ -460,21 +460,6 @@ class deploy {
 		}
 
 		$this->table($table);
-	}
-
-	public function gitx_generate($path=null) {
-		$this->directory_exists($path);
-
-		/* find all repros */
-		exec('find '.$path.' -name FETCH_HEAD',$output);
-
-		/* xgit update {PWD} {GIT_BRANCH} */
-		foreach ($output as $o) {
-			$string = 'xgit update # {GIT_BRANCH}';
-			$relative = str_replace($this->config['rootpath'],'{PWD}',dirname(dirname($o)));
-
-			$this->e(str_replace('#',$relative,$string));
-		}
 	}
 
 	public function set($name,$value) {
