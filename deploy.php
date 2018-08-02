@@ -10,7 +10,7 @@ ini_set('display_errors', 1);
 error_reporting(E_ALL ^ E_NOTICE);
 
 $config = [
-	'version'=>'4.0.4',
+	'version'=>'4.0.5',
 	'deploy_file'=>getcwd().'/deploy.json',
 	'args'=>$_SERVER['argv'],
 	'verbose'=>false,
@@ -37,6 +37,28 @@ class deploy {
 		$this->config = $config;
 
 		$this->heading('Deploy Version '.$this->config['version']);
+
+		/* move up the folder until we find deploy.json */
+		if (!file_exists($this->config['deploy_file'])) {
+			$this->e('<red>Looking for deploy.json');
+
+			$dir = dirname($this->config['deploy_file']);
+		
+			while (1 == 1) {
+				$this->e('<cyan>'.dirname($dir));
+
+				$dir = dirname($dir);
+				
+				if (file_exists($dir.'/deploy.json')) {
+					$this->config['deploy_file'] = $dir.'/deploy.json';
+					break;				
+				}
+				
+				if (strlen($dir) < 2) {
+					break;
+				}
+			}
+		}
 
 		/* capture trigger_error() */
 		set_error_handler(function($errno, $errstr, $errfile, $errline) {
