@@ -10,8 +10,8 @@ ini_set('display_errors', 1);
 error_reporting(E_ALL ^ E_NOTICE);
 
 $config = [
-	'version'=>'4.0.6',
-	'deploy_file'=>getcwd().'/deploy.json',
+	'version'=>'4.0.7',
+	'deploy_file'=>'deploy.json',
 	'args'=>$_SERVER['argv'],
 	'verbose'=>false,
 ];
@@ -38,30 +38,30 @@ class deploy {
 
 		$this->heading('Deploy Version '.$this->config['version']);
 
+		$dir = getcwd();
+
 		/* move up the folder until we find deploy.json */
-		if (!file_exists($this->config['deploy_file'])) {
-			$this->e('<red>Looking for deploy.json</off>');
+		$this->e('<yellow>Looking for '.$this->config['deploy_file'].'</off>');
 
-			$dir = dirname($this->config['deploy_file']);
-		
-			while (1 == 1) {
-				$dir = dirname($dir);
-				
-				if (file_exists($dir.'/deploy.json')) {
-					$this->config['deploy_file'] = $dir.'/deploy.json';
+		while (1 == 1) {
+			$search_path = '/'.trim($dir.'/'.$this->config['deploy_file'],'/');
 
-					$this->e('<cyan>'.dirname($dir).'</off> <green>√</off>');
-					
-					chdir($dir);
-					break;				
-				}
-	
-				$this->e('<cyan>'.dirname($dir).'</off> <red>⇩</off>');
- 				
-				if (strlen($dir) < 2) {
-					break;
-				}
+			if (file_exists($search_path)) {
+				$this->config['deploy_file'] = $search_path;
+
+				$this->e($search_path.' <green>√</off>');
+
+				chdir($dir);
+				break;
 			}
+
+			$this->e($search_path.' <red>X</off>');
+
+			if (strlen($dir) == 1) {
+				break;
+			}
+
+			$dir = dirname($dir);
 		}
 
 		/* capture trigger_error() */
@@ -423,7 +423,7 @@ class deploy {
 
 		exit($switch);
 	}
-	
+
 	public function switch_stdout($switch=null) {
 		$this->switch_storage['stdout'] = ($switch == 'on') ? true : false;
 	}
@@ -466,9 +466,9 @@ class deploy {
 		$this->directory_exists($path);
 
 		$output = '';
-		
+
 		$this->sub_heading(getcwd());
-		
+
 		/* find all repros */
 		exec('find '.$path.' -name .git',$output);
 
