@@ -2,3 +2,6 @@
 /testing
 /env.json
 /env.ini
+/foo
+/.env
+/.DS_Store

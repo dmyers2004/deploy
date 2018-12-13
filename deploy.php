@@ -3,14 +3,14 @@
 /*
 Most common Bash date commands for time stamping
 https://zxq9.com/archives/795
-*/
+ */
 
 ini_set('memory_limit','512M');
 ini_set('display_errors', 1);
 error_reporting(E_ALL ^ E_NOTICE);
 
 $config = [
-	'version'=>'4.0.7',
+	'version'=>'4.0.8',
 	'deploy_file'=>'deploy.json',
 	'args'=>$_SERVER['argv'],
 	'verbose'=>false,
@@ -294,22 +294,37 @@ class deploy {
 	}
 
 	public function get_help() {
-		$rows = [];
+		$rows['aaaaaaaaa'][] = ['Available Tasks:',''];
 
 		foreach ($this->deploy_json as $key=>$values) {
 			foreach ((array)$values as $value) {
-				if (substr($value,0,4) == '// %') {
-					$rows[] = ['<green>'.$key.'</green>',trim(substr($value,4))];
+				if (in_array(substr($value,0,1),['/','%','#'])) {
+					$prefix = substr($value,0,4);
+					$line = trim(substr($value,4));
+
+					switch ($prefix) {
+						case '// %':
+							$rows[strtolower($key)][] = ['<green>'.$key.'</green>',$line];
+						break;
+						case '// #':
+							$rows[strtolower($key)][] = [' ',$line];
+						break;
+					}
 				}
 			}
 		}
 
-		array_multisort($rows);
+		ksort($rows);
 
-		/* prepend heading */
-		array_unshift($rows,['Available Tasks:','']);
+		$formatted = [];
 
-		return $rows;
+		foreach ($rows as $r1=>$r2) {
+			foreach ($r2 as $v) {
+				$formatted[] = [$v[0],$v[1]];
+			}
+		}
+
+		return $formatted;
 	}
 
 	public function shell($cmd, &$stdout=null, &$stderr=null) {
@@ -446,6 +461,33 @@ class deploy {
 		}
 	}
 
+	/* gitx checkout "git clone git@bitbucket.org:quadratec/affirm.git" {PWD}/packages/quadratec/affirm {GITBRANCH} */
+	public function gitx_checkout($repro_uri=null,$path=null,$branch=null) {
+		if (!$repro_uri) {
+			trigger_error('GIT repository URI not specified please provide one');
+		}
+		if (!$path) {
+			trigger_error('GIT path not specified please provide one');
+		}
+		if (!$branch) {
+			trigger_error('GIT branch not specified please provide one');
+		}
+
+		mkdir($path,0777,true);
+
+		if (file_exists($path.'/.git')) {
+			$this->e('<red>** '.$path.' repository is already checked out.</off>');
+		} else {
+			$cli = 'git clone -b '.$branch.' '.$repro_uri.' '.str_replace(' ','\ ',$path);
+
+			$this->v($cli);
+
+			$this->e('Checking out '.$path);
+
+			$this->shell($cli);
+		}
+	}
+
 	public function gitx_update($path=null,$branch=null) {
 		if (!$branch) {
 			trigger_error('GIT Branch not specified please provide one');
@@ -529,7 +571,7 @@ class deploy {
 
 		$this->file_exists($filepath);
 
-		$this->sub_heading('Importing '.$filepath);
+		$this->sub_heading('Importing '.$filepath.' as an '.$filetype.'.');
 
 		switch($filetype) {
 			case 'ini':
@@ -548,6 +590,8 @@ class deploy {
 			case 'json':
 				$array = json_decode(file_get_contents($filepath),true);
 			break;
+			default:
+				trigger_error('Unknown file type "'.$filetype.'".');
 		}
 
 		if (is_array($array)) {
@@ -555,7 +599,7 @@ class deploy {
 				$this->merge[$name] = $value;
 			}
 		} else {
-			trigger_error('Your input file did return a Array.');
+			trigger_error('Your import file did return an Array.');
 		}
 	}
 
