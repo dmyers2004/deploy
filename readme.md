@@ -1,9 +1,9 @@
 # Deploy
 
 Deploy is used to provide project specific deploy "tasks".
-By default deply will look in the directory you are currently in for a deploy.json file.
+By default deply will look in the directory you are currently in for a deploy.json file. If it cannot locate the deploy.json file in that folder it will try the next level up the directory tree.
 
-Each task is one or more shell script commands and can also call other tasks among other built in commands.
+Each task is one or more shell script commands and can also call other tasks as well as deploy built in commands.
 
 You can then run a task by simply supplying the tasks name
 
@@ -15,32 +15,36 @@ deploy backup database
 deploy fix permissions
 ```
 
-You can also supply no task to get a list of all avaiable tasks.
+You can also supply no task to get a list of all available tasks.
 
 ```
 > deploy
-- Deploy Version 4.0.2 ---------------------------------------------------------
-# Using Deploy File /Users/randy/Projects/webapp/deploy.json
-Available Tasks:
-add access               Auto add the permissions to the orange permissions db table.
-backup database data     Backup only the database data.
-basic                    Run Basic Site Update.
-clear caches             Delete all files in the cache, uploads, downloads folders.
-clear sessions           Delete all files in the session folder.
-complete database backup Backup the entire database.
-complete                 Run Complete Site Update.
-copy public              Copy complete folders between package folders and public folders.
-git basic update         Fetch and Reset the basic git Modules.
-git generate             Display all of the GIT repositories in your project
-git status               Show the GIT branches of the projects git folders.
-git update               Fetch and Reset all git Modules.
-migrate                  Run migration Up.
-repair                   Repair folder permissions.
-self-update              Updates deploy to the latest version.
-selfupdate               Updates deploy to the latest version.
-site down                Site Down.
-site up                  Site Up.
-testing                  Create Symbolic links between package folders and public folders.
+- Deploy Version 4.0.8 --------------------------------------------------------------------------------------------------------------------------------------------------
+Looking for deploy.json
+/Users/randy/Projects/deploy/deploy.json √
+# Using Deploy File /Users/randy/Projects/deploy/deploy.json
+Available Tasks:                                                                           
+add access               Auto add the permissions to the orange permissions db table.      
+backup database data     Backup only the database data.                                    
+basic                    Run Basic Site Update.                                            
+clear caches             Delete all files in the cache, uploads, downloads folders.        
+clear sessions           Delete all files in the session folder.                           
+complete                 Run Complete Site Update.                                         
+complete database backup Backup the entire database.                                       
+copy public              Copy complete folders between package folders and public folders. 
+git basic update         Fetch and Reset the basic git Modules.                            
+git checkout             Checkout GIT repositories if they are not already checked out.    
+git generate             Display all of the GIT repositories in your project               
+git status               Show the GIT branches of the projects git folders.                
+git update               Fetch and Reset all git Modules.                                  
+migrate                  Run migration Up.                                                 
+repair                   Repair folder permissions.                                        
+self-update              Updates deploy to the latest version.                             
+selfupdate               Updates deploy to the latest version.                             
+site down                Site Down.                                                        
+site up                  Site Up.                                                          
+test                     test.                                                             
+testing                  Create Symbolic links between package folders and public folders. 
 ```
 
 ## Command Line Options
@@ -71,15 +75,22 @@ table_column - A table column with column widths. `table_columns Don 32 Applesee
 
 import - Import a file into merge scope. Supported types include array, yaml, json, ini `import array {PWD}\.env`
 
-gitx update - Extended git (gitx) command to simplify a git update based on a branch. `gitx update {PWD}/path {GIT_BRANCH}`
+gitx update - Extended git (gitx) command to simplify a git update based on a branch. `gitx update {PWD}/packages/projectorangebox/orange`
 
-gitx status - Extended git (gitx) command to view the branch of all git repositories. `gitx status {PWD}/path`
+gitx status - Extended git (gitx) command to view the branch of all git repositories. `gitx status {PWD}/packages/projectorangebox/orange`
+
+gitx checkout - Extended git (gitx) command to checkout a git repositories. `gitx checkout https://github.com/ProjectOrangeBox/orangev2.git {PWD}/packages/projectorangebox/orange {GITBRANCH}`
 
 set - Sets a deploy merge variable. `set username 'Johnny Appleseed'`
 
 capture - Capture shell script output into a deploy merge variable. `capture variable_name 'date +%F_%T'`
 
 task - Run another task inside the current task. `task 'repair files'`
+
+if () - Run a Single Level If statement ie. "if ({PWD} == '123/abc')"
+
+endif - Exit the Single Level If Statement
+
 
 // Comment. `// do something`
 
@@ -132,6 +143,39 @@ Self updating will automatically checkout the GIT repository, make it executable
 		"mkdir -p {PWD}/testing/support",
 		"touch {PWD}/testing/foobar",
 		"chmod -Rf 777 {PWD}/testing"
+	],
+	"test": [
+		"// % test.",
+		"capture PWD pwd",
+		"import ini {PWD}/.env",
+		"set foobar 123",
+		"e 'Using GIT Branch {GITBRANCH}'",
+		"if ('123/abc' == t)",
+		"set PWD /foo/bar",
+		"endif",
+		"e '{PWD}'"
+	],
+	"git checkout": [
+		"// % Checkout GIT repositories if they are not already checked out.",
+		"@sudo on",
+		"capture PWD pwd",
+		"import ini {PWD}/.env",
+		"e 'Using GIT Branch {GITBRANCH}'",
+		"gitx checkout git@bitbucket.org:example/application.git {PWD}/~app {GITBRANCH}",
+		"gitx checkout git@bitbucket.org:example/example-backorder.git {PWD}/packages/example/backorder {GITBRANCH}",
+		"gitx checkout git@bitbucket.org:example/example-stock-status-check.git {PWD}/packages/example/stock-status-check {GITBRANCH}",
+		"gitx checkout git@bitbucket.org:example/example-drop-ships.git {PWD}/packages/example/drop-ships {GITBRANCH}",
+		"gitx checkout git@bitbucket.org:example/projectorangebox-opcache.git {PWD}/packages/misc/opcache {GITBRANCH}",
+		"gitx checkout git@bitbucket.org:example/projectorangebox-config-viewer.git {PWD}/packages/misc/config-viewer {GITBRANCH}",
+		"gitx checkout git@bitbucket.org:example/projectorangebox-login-success.git {PWD}/packages/misc/login-success {GITBRANCH}",
+		"gitx checkout git@bitbucket.org:example/projectorangebox-extra-validations.git {PWD}/packages/projectorangebox/extra-validations {GITBRANCH}",
+		"gitx checkout https://github.com/ProjectOrangeBox/Orange_v2_cli.git {PWD}/packages/projectorangebox/migrations {GITBRANCH}",
+		"gitx checkout https://github.com/ProjectOrangeBox/orangev2.git {PWD}/packages/projectorangebox/orange {GITBRANCH}",
+		"gitx checkout https://github.com/ProjectOrangeBox/theme-orangev2.git {PWD}/packages/projectorangebox/theme-orange {GITBRANCH}",
+		"rm {PWD}/~app/.env",
+		"cp -R {PWD}/~app/.git {PWD}/.git",
+		"cp -R {PWD}/~app/* {PWD}",
+		"rm -fdr {PWD}/~app"
 	],
 	"copy public": [
 		"// % Copy complete folders between package folders and public folders.",
