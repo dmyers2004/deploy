@@ -16,9 +16,7 @@ $config = [
 	'verbose'=>false,
 ];
 
-$deploy = new deploy($config);
-
-$deploy->options()->process();
+(new deploy($config))->options()->process();
 
 exit();
 
@@ -170,7 +168,7 @@ class deploy {
 		$function = str_replace('@','switch_',$function);
 
 		if (in_array(substr($command,0,1),['/','%','#'])) {
-			/* it's a comment */
+			/* it's a comment skip */
 		} elseif (method_exists($this,$function)) {
 			/* it's a method that exists on this class */
 			array_shift($args);
@@ -189,17 +187,20 @@ class deploy {
 			}
 		}
 	}
-
+	
+	/* single level does not support nesting */
 	public function if()
 	{
 		$this->skip = !$this->formula(trim(substr($this->current_line,3),'() '));
 	}
 
+	/* single level does not support nesting */
 	public function endif()
 	{
 		$this->skip = false;
 	}
-
+	
+	/* handle if logic */
 	public function formula($field)
 	{
 		if (preg_match_all("/{([^}]+)}/", $field, $m)) {
