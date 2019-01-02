@@ -33,7 +33,8 @@ class deploy {
 	public $current_task = null;
 	public $current_line = null;
 
-	public function __construct($config) {
+	public function __construct($config)
+	{
 		$this->config = $config;
 
 		$this->heading('Deploy Version '.$this->config['version']);
@@ -84,7 +85,8 @@ class deploy {
 		/* done construct */
 	}
 
-	public function options() {
+	public function options()
+	{
 		/* process arguments */
 
 		/* get the cli arguments */
@@ -135,7 +137,8 @@ class deploy {
 		return $this;
 	}
 
-	public function process() {
+	public function process()
+	{
 		/* get our deploy file */
 		$this->deploy_json = array_merge($this->get_hard_actions(),$this->get_deploy());
 
@@ -154,7 +157,8 @@ class deploy {
 		}
 	}
 
-	public function run($command) {
+	public function run($command)
+	{
 		/* smart explode (don't break on spaces inside single quotes) */
 		$args = str_getcsv(str_replace(chr(39),chr(34),$command),chr(32),chr(34));
 
@@ -185,15 +189,18 @@ class deploy {
 		}
 	}
 
-	public function task_exists($task_name) {
+	public function task_exists($task_name)
+	{
 		return (array_key_exists($task_name,$this->deploy_json));
 	}
 
-	public function selfupdate() {
+	public function selfupdate()
+	{
 		$this->self_update();
 	}
 
-	public function self_update() {
+	public function self_update()
+	{
 		$this->heading('Self Updating');
 
 		exec('rm -fdr /tmp/deploy;git clone https://github.com/dmyers2004/deploy.git /tmp/deploy;mv /tmp/deploy/deploy.php '.__FILE__.';chmod 755 '.__FILE__);
@@ -201,7 +208,8 @@ class deploy {
 		$this->sub_heading('Complete');
 	}
 
-	public function cli($command) {
+	public function cli($command)
+	{
 		$exit_code = 0;
 
 		$cli = $this->merge($command);
@@ -213,7 +221,8 @@ class deploy {
 		return $exit_code;
 	}
 
-	public function merge($input) {
+	public function merge($input)
+	{
 		/* find all the {???} and make sure we have keys */
 		$found = preg_match_all('/{(.+?)}/m', $input, $matches, PREG_SET_ORDER, 0);
 
@@ -230,7 +239,8 @@ class deploy {
 		return $input;
 	}
 
-	public function color($input) {
+	public function color($input)
+	{
 		// Set up shell colors
 		$foreground_colors['off'] = '0;0';
 
@@ -260,7 +270,8 @@ class deploy {
 		return $input;
 	}
 
-	public function get_deploy() {
+	public function get_deploy()
+	{
 		$array = [];
 
 		if (!file_exists($this->config['deploy_file'])) {
@@ -278,7 +289,8 @@ class deploy {
 		return (array)$array;
 	}
 
-	public function get_hard_actions() {
+	public function get_hard_actions()
+	{
 		return (array)json_decode('
 	{
 		"self-update": [
@@ -293,7 +305,8 @@ class deploy {
 		');
 	}
 
-	public function get_help() {
+	public function get_help()
+	{
 		$rows['aaaaaaaaa'][] = ['Available Tasks:',''];
 
 		foreach ($this->deploy_json as $key=>$values) {
@@ -327,7 +340,8 @@ class deploy {
 		return $formatted;
 	}
 
-	public function shell($cmd, &$stdout=null, &$stderr=null) {
+	public function shell($cmd, &$stdout=null, &$stderr=null)
+	{
 		$proc = proc_open($cmd,[
 				1 => ['pipe','w'],
 				2 => ['pipe','w'],
@@ -351,7 +365,8 @@ class deploy {
 	}
 
 	/** table */
-	public function table($table) {
+	public function table($table)
+	{
 		$extra_pad = 1;
 		$widths = [];
 
@@ -380,7 +395,8 @@ class deploy {
 		}
 	}
 
-	public function table_heading($kv=null) {
+	public function table_heading($kv=null)
+	{
 		$kv = ($kv) ? $kv : $this->table_key_value_set(func_get_args());
 
 		foreach ($kv as $text=>$width) {
@@ -390,7 +406,8 @@ class deploy {
 		echo chr(10);
 	}
 
-	public function table_columns($kv=null) {
+	public function table_columns($kv=null)
+	{
 		$kv = ($kv) ? $kv : $this->table_key_value_set(func_get_args());
 
 		foreach ($kv as $text=>$width) {
@@ -400,7 +417,8 @@ class deploy {
 		echo chr(10);
 	}
 
-	public function table_key_value_set($input) {
+	public function table_key_value_set($input)
+	{
 		$count = count($input);
 		$array = [];
 
@@ -411,13 +429,15 @@ class deploy {
 		return $array;
 	}
 
-	public function paddy($input,$width) {
+	public function paddy($input,$width)
+	{
 		return $this->color($input).str_repeat(' ',($width - strlen(strip_tags($input))));
 	}
 
 	/** @ switches */
 
-	public function switch_sudo($switch='on') {
+	public function switch_sudo($switch='on')
+	{
 		$switch = trim($switch);
 
 		$this->v('switch sudo '.$switch);
@@ -431,7 +451,8 @@ class deploy {
 		$this->sudo = ($switch == 'on') ? 'sudo ' : '';
 	}
 
-	public function switch_exit($switch=null) {
+	public function switch_exit($switch=null)
+	{
 		$switch = ($switch) ? trim($switch) : null;
 
 		$this->v('switch exit '.$switch);
@@ -439,17 +460,20 @@ class deploy {
 		exit($switch);
 	}
 
-	public function switch_stdout($switch=null) {
+	public function switch_stdout($switch=null)
+	{
 		$this->switch_storage['stdout'] = ($switch == 'on') ? true : false;
 	}
 
-	public function switch_stderr($switch=null) {
+	public function switch_stderr($switch=null)
+	{
 		$this->switch_storage['stderr'] = ($switch == 'on') ? true : false;
 	}
 
 	/** add-on commands */
 
-	public function gitx() {
+	public function gitx()
+	{
 		$m = __FUNCTION__;
 		$args = func_get_args();
 		$method = array_shift($args);
@@ -462,7 +486,8 @@ class deploy {
 	}
 
 	/* gitx checkout "git clone git@bitbucket.org:quadratec/affirm.git" {PWD}/packages/quadratec/affirm {GITBRANCH} */
-	public function gitx_checkout($repro_uri=null,$path=null,$branch=null) {
+	public function gitx_checkout($repro_uri=null,$path=null,$branch=null)
+	{
 		if (!$repro_uri) {
 			trigger_error('GIT repository URI not specified please provide one');
 		}
@@ -473,22 +498,90 @@ class deploy {
 			trigger_error('GIT branch not specified please provide one');
 		}
 
-		mkdir($path,0777,true);
-
 		if (file_exists($path.'/.git')) {
-			$this->e('<red>** '.$path.' repository is already checked out.</off>');
+			$branch = exec("cd ".str_replace(' ','\ ',$path).";git rev-parse --abbrev-ref HEAD")	;
+
+			$this->e('<red>** '.$path.' repository is already checked out and on branch "'.$branch.'".</off>');
 		} else {
-			$cli = 'git clone -b '.$branch.' '.$repro_uri.' '.str_replace(' ','\ ',$path);
+			$use_branch = $branch;
+
+			$options = [];
+
+			$exists = $this->get_remote_branches($repro_uri,$branch,$options);
+
+			if (!$exists) {
+				/* git@bitbucket.org:quadratec/projectorangebox-extra-validations.git */
+				$parts = explode(':',$repro_uri);
+
+				$use_branch = $this->select_option($options,'The GIT branch "'.$branch.'" is not available on "'.substr(end($parts),0,-4).'".');
+			}
+
+			$cli = 'git clone -b '.$use_branch.' '.$repro_uri.' '.str_replace(' ','\ ',$path);
 
 			$this->v($cli);
 
-			$this->e('Checking out '.$path);
+			$this->e('Checking out '.$use_branch.' '.$path);
 
 			$this->shell($cli);
 		}
 	}
 
-	public function gitx_update($path=null,$branch=null) {
+	protected function select_option($options,$text=null)
+	{
+		$loop = true;
+
+		while ($loop) {
+			if ($text) {
+				$this->e($text);
+			}
+
+			$this->e('Your choices are.');
+
+			foreach ($options as $o) {
+				$this->e(chr(9).'<cyan>'.$o.'</cyan>');
+			}
+
+			$handle = fopen ('php://stdin','r');
+
+			$line = fgets($handle);
+
+			fclose($handle);
+
+			$line = trim($line);
+
+			if (in_array($line,$options)) {
+				$loop = false;
+			} else {
+				$this->e('<red>'.$line.' not found.</red>');
+			}
+		}
+
+		return $line;
+	}
+
+	protected function get_remote_branches($uri,$branch,&$found)
+	{
+		$stdout = $stderr = '';
+
+		$this->shell('git ls-remote --heads '.$uri,$stdout,$stderr);
+
+		foreach (explode(chr(10),trim($stdout)) as $txt) {
+			$parts = explode('/',$txt);
+
+			$found_branch = end($parts);
+
+			$found[] = $found_branch;
+
+			if ($found_branch == $branch) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	public function gitx_update($path=null,$branch=null)
+	{
 		if (!$branch) {
 			trigger_error('GIT Branch not specified please provide one');
 		}
@@ -504,7 +597,8 @@ class deploy {
 		}
 	}
 
-	public function gitx_status($path=null) {
+	public function gitx_status($path=null)
+	{
 		$this->directory_exists($path);
 
 		$output = '';
@@ -530,7 +624,8 @@ class deploy {
 		$this->table($table);
 	}
 
-	public function set($name,$value) {
+	public function set($name,$value)
+	{
 		$this->merge[$name] = $value;
 	}
 
@@ -546,7 +641,8 @@ class deploy {
 		return $error_code;
 	}
 
-	public function task($task_name) {
+	public function task($task_name)
+	{
 		if (!$this->task_exists($task_name)) {
 			trigger_error('Task "'.$task_name.'" Not Found.');
 		}
@@ -562,7 +658,8 @@ class deploy {
 		}
 	}
 
-	public function import($filetype,$filepath) {
+	public function import($filetype,$filepath)
+	{
 		$return = false;
 
 		if (!in_array($filetype,['json','ini','yaml','array'])) {
@@ -603,35 +700,42 @@ class deploy {
 		}
 	}
 
-	public function heading($txt) {
+	public function heading($txt)
+	{
 		$this->e('<cyan>'.str_pad('- '.$txt.' ',exec('tput cols'),'-',STR_PAD_RIGHT).'</cyan>');
 	}
 
-	public function sub_heading($txt) {
+	public function sub_heading($txt)
+	{
 		$this->e('<blue># '.$txt.'</blue>');
 	}
 
-	public function e($txt) {
+	public function e($txt)
+	{
 		echo $this->color($txt).chr(10);
 	}
 
-	public function v($txt) {
+	public function v($txt)
+	{
 		if ($this->config['verbose']) {
 			$this->e($txt);
 		}
 	}
 
-	public function file_exists($path,$extra='file ') {
+	public function file_exists($path,$extra='file ')
+	{
 		if (!file_exists($path)) {
 			trigger_error('Could not locate '.$extra.$path);
 		}
 	}
 
-	public function directory_exists($path) {
+	public function directory_exists($path)
+	{
 		$this->file_exists($path,'directory ');
 	}
 
-	public function readline($name,$text) {
+	public function readline($name,$text)
+	{
 		echo $text;
 
 		$handle = fopen("php://stdin","r");
