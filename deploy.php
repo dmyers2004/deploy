@@ -32,6 +32,7 @@ class deploy {
 	public $config = [];
 	public $current_task = null;
 	public $current_line = null;
+	public $skip = false;
 
 	public function __construct($config)
 	{
@@ -187,6 +188,43 @@ class deploy {
 				trigger_error('Command Exit Exception '.$exit_code.'.');
 			}
 		}
+	}
+
+	public function if()
+	{
+		$this->skip = !$this->formula(trim(substr($this->current_line,3),'() '));
+	}
+
+	public function endif()
+	{
+		$this->skip = false;
+	}
+
+	public function formula($field)
+	{
+		if (preg_match_all("/{([^}]+)}/", $field, $m)) {
+			foreach ($m[1] as $value) {
+				$v = (isset($this->merge[$value])) ? $this->merge[$value] : null;
+
+				if ($v == 'true') {
+					$v = 'true';
+				} elseif ($v == 'false') {	
+					$v = 'false';
+				} elseif (is_string($v)) {
+					$v = "'".$v."'";
+				} else {
+					$v = '';
+				}
+
+				$field = str_replace('{'.$value.'}',$v,$field);
+			}
+		}
+
+		$function = 'return ('.$field.');';
+
+		$func = create_function('',$function);
+
+		return $func();
 	}
 
 	public function task_exists($task_name)
@@ -471,7 +509,8 @@ class deploy {
 	}
 
 	/** add-on commands */
-
+	
+	/* git something... */
 	public function gitx()
 	{
 		$m = __FUNCTION__;
@@ -555,17 +594,17 @@ class deploy {
 		return false;
 	}
 
-	public function gitx_update($path=null,$branch=null)
+	public function gitx_update($path=null)
 	{
-		if (!$branch) {
-			trigger_error('GIT Branch not specified please provide one.');
-		}
-
 		$this->directory_exists($path);
 
 		if (!file_exists($path.'/.git')) {
 			trigger_error('Not a GIT repository '.$path.'.');
 		} else {
+			$branch = exec("cd ".str_replace(' ','\ ',$path).";git rev-parse --abbrev-ref HEAD");
+
+			$this->e('<cyan>Updating</cyan> '.$path.chr(9).'<cyan>Branch</cyan> '.$branch);
+
 			$this->v('cd '.$path.';git fetch --all;git reset --hard origin/'.$branch);
 
 			$this->shell('cd '.$path.';git fetch --all;git reset --hard origin/'.$branch);
@@ -630,7 +669,9 @@ class deploy {
 		foreach ($this->deploy_json[$task_name] as $command) {
 			$this->current_line = $command;
 
-			$exit_code = $this->run($command);
+			if (!$this->skip) {
+				$exit_code = $this->run($command);
+			}
 		}
 	}
 
