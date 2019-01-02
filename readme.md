@@ -256,8 +256,8 @@ Self updating will automatically checkout the GIT repository, make it executable
 		"capture PWD pwd",
 		"import array {PWD}/.env",
 		"gitx update {PWD} {GIT_BRANCH}",
-		"gitx update {PWD}/packages/projectorangebox/orange {GIT_BRANCH}",
-		"gitx update {PWD}/packages/projectorangebox/theme-orange {GIT_BRANCH}"
+		"gitx update {PWD}/packages/projectorangebox/orange",
+		"gitx update {PWD}/packages/projectorangebox/theme-orange"
 	],
 	"git status": [
 		"// % Show the GIT branches of the projects git folders.",
