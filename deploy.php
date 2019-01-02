@@ -524,7 +524,11 @@ class deploy {
 		}
 	}
 
-	/* gitx checkout "git clone git@bitbucket.org:quadratec/affirm.git" {PWD}/packages/quadratec/affirm {GITBRANCH} */
+	/*
+	gitx checkout https://github.com/ProjectOrangeBox/orangev2.git {PWD}/packages/projectorangebox/orange {GITBRANCH}
+	
+	clone a specific branch to local folder
+	*/
 	public function gitx_checkout($repro_uri=null,$path=null,$branch=null)
 	{
 		if (!$repro_uri) {
@@ -540,7 +544,7 @@ class deploy {
 		if (file_exists($path.'/.git')) {
 			$branch = exec("cd ".str_replace(' ','\ ',$path).";git rev-parse --abbrev-ref HEAD")	;
 
-			$this->e('<red>** '.$path.' repository is already checked out and on branch "'.$branch.'".</off>');
+			$this->e('<red>** '.$path.' repository is already checked out and on branch <cyan>'.$branch.'</off>');
 		} else {
 			$use_branch = $branch;
 
@@ -549,7 +553,6 @@ class deploy {
 			$exists = $this->get_remote_branches($repro_uri,$branch,$options);
 
 			if (!$exists) {
-				/* git@bitbucket.org:quadratec/projectorangebox-extra-validations.git */
 				$parts = explode(':',$repro_uri);
 
 				$use_branch = $this->select_option($options,'The GIT branch "'.$branch.'" is not available on "'.substr(end($parts),0,-4).'".');
@@ -565,35 +568,11 @@ class deploy {
 		}
 	}
 
-	protected function get_remote_branches($uri,$branch,&$found)
-	{
-		if (!$uri) {
-			trigger_error('GIT repository URI not specified please provide one.');
-		}
-
-		if (!$branch) {
-			trigger_error('GIT Branch not specified please provide one.');
-		}
-
-		$stdout = $stderr = '';
-
-		$this->shell('git ls-remote --heads '.$uri,$stdout,$stderr);
-
-		foreach (explode(chr(10),trim($stdout)) as $txt) {
-			$parts = explode('/',$txt);
-
-			$found_branch = end($parts);
-
-			$found[] = $found_branch;
-
-			if ($found_branch == $branch) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
+	/*
+	gitx update {PWD}/packages/projectorangebox/orange
+	
+	git fetch and hard reset
+	*/
 	public function gitx_update($path=null)
 	{
 		$this->directory_exists($path);
@@ -603,39 +582,32 @@ class deploy {
 		} else {
 			$branch = exec("cd ".str_replace(' ','\ ',$path).";git rev-parse --abbrev-ref HEAD");
 
-			$this->e('<cyan>Updating</cyan> '.$path.chr(9).'<cyan>Branch</cyan> '.$branch);
-
 			$this->v('cd '.$path.';git fetch --all;git reset --hard origin/'.$branch);
 
 			$this->shell('cd '.$path.';git fetch --all;git reset --hard origin/'.$branch);
+			
+			$this->gitx_status($path);
 		}
 	}
 
+	/*
+	gitx status {PWD}/packages/projectorangebox/orange
+	
+	read the branch and current commit hash
+	*/
 	public function gitx_status($path=null)
 	{
 		$this->directory_exists($path);
 
-		$output = '';
+		if (!file_exists($path.'/.git')) {
+			trigger_error('Not a GIT repository '.$path.'.');
+		} else {
+			$branch = exec("cd ".str_replace(' ','\ ',$path).";git rev-parse --abbrev-ref HEAD");
+			$hash = exec("cd ".str_replace(' ','\ ',$path).";git rev-parse --verify HEAD");
+			$package = '/'.trim(str_replace(getcwd(),'',$path),'/');
 
-		$this->sub_heading(getcwd());
-
-		/* find all repros */
-		exec('find '.$path.' -name .git',$output);
-
-		$table[] = ['Package','Branch','Hash'];
-
-		foreach ($output as $o) {
-			$dirname = dirname($o);
-
-			$branch = exec("cd ".str_replace(' ','\ ',$dirname).";git rev-parse --abbrev-ref HEAD");
-			$hash = exec("cd ".str_replace(' ','\ ',$dirname).";git rev-parse --verify HEAD");
-
-			$package = '/'.trim(str_replace(getcwd(),'',$dirname),'/');
-
-			$table[] = [$package,$branch,$hash];
+			$this->e('<red>'.$hash.'</red>  <cyan>'.str_pad($branch,16,' ').'</cyan><white>'.$package.'</white>');
 		}
-
-		$this->table($table);
 	}
 
 	public function set($name,$value)
@@ -795,6 +767,35 @@ class deploy {
 		}
 
 		return $line;
+	}
+
+	protected function get_remote_branches($uri,$branch,&$found)
+	{
+		if (!$uri) {
+			trigger_error('GIT repository URI not specified please provide one.');
+		}
+
+		if (!$branch) {
+			trigger_error('GIT Branch not specified please provide one.');
+		}
+
+		$stdout = $stderr = '';
+
+		$this->shell('git ls-remote --heads '.$uri,$stdout,$stderr);
+
+		foreach (explode(chr(10),trim($stdout)) as $txt) {
+			$parts = explode('/',$txt);
+
+			$found_branch = end($parts);
+
+			$found[] = $found_branch;
+
+			if ($found_branch == $branch) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 } /* end class */
