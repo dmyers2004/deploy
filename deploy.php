@@ -184,7 +184,7 @@ class deploy {
 			$exit_code = $this->cli($command);
 
 			if ($exit_code > 0) {
-				trigger_error('Command Exit Exception '.$exit_code);
+				trigger_error('Command Exit Exception '.$exit_code.'.');
 			}
 		}
 	}
@@ -229,7 +229,7 @@ class deploy {
 		if ($found > 0) {
 			foreach ($matches as $match) {
 				if (!isset($this->merge[$match[1]])) {
-					trigger_error('Missing Merge Key for {'.$match[1].'}');
+					trigger_error('Missing Merge Key for {'.$match[1].'}.');
 				} else {
 					$input = str_replace('{'.$match[1].'}',$this->merge[$match[1]],$input);
 				}
@@ -282,7 +282,7 @@ class deploy {
 			$array = json_decode(file_get_contents($this->config['deploy_file']));
 
 			if ($array === null) {
-				trigger_error($this->config['deploy_file'].' malformed');
+				trigger_error($this->config['deploy_file'].' malformed.');
 			}
 		}
 
@@ -481,7 +481,7 @@ class deploy {
 		if (method_exists($this,$m.'_'.$method)) {
 			call_user_func_array([$this,$m.'_'.$method],$args);
 		} else {
-			trigger_error($m.' function '.$method.' is not found');
+			trigger_error($m.' function '.$method.' is not found.');
 		}
 	}
 
@@ -489,13 +489,13 @@ class deploy {
 	public function gitx_checkout($repro_uri=null,$path=null,$branch=null)
 	{
 		if (!$repro_uri) {
-			trigger_error('GIT repository URI not specified please provide one');
+			trigger_error('GIT repository URI not specified please provide one.');
 		}
 		if (!$path) {
-			trigger_error('GIT path not specified please provide one');
+			trigger_error('GIT path not specified please provide one.');
 		}
 		if (!$branch) {
-			trigger_error('GIT branch not specified please provide one');
+			trigger_error('GIT branch not specified please provide one.');
 		}
 
 		if (file_exists($path.'/.git')) {
@@ -526,41 +526,16 @@ class deploy {
 		}
 	}
 
-	protected function select_option($options,$text=null)
-	{
-		$loop = true;
-
-		while ($loop) {
-			if ($text) {
-				$this->e($text);
-			}
-
-			$this->e('Your choices are.');
-
-			foreach ($options as $o) {
-				$this->e(chr(9).'<cyan>'.$o.'</cyan>');
-			}
-
-			$handle = fopen ('php://stdin','r');
-
-			$line = fgets($handle);
-
-			fclose($handle);
-
-			$line = trim($line);
-
-			if (in_array($line,$options)) {
-				$loop = false;
-			} else {
-				$this->e('<red>'.$line.' not found.</red>');
-			}
-		}
-
-		return $line;
-	}
-
 	protected function get_remote_branches($uri,$branch,&$found)
 	{
+		if (!$uri) {
+			trigger_error('GIT repository URI not specified please provide one.');
+		}
+
+		if (!$branch) {
+			trigger_error('GIT Branch not specified please provide one.');
+		}
+
 		$stdout = $stderr = '';
 
 		$this->shell('git ls-remote --heads '.$uri,$stdout,$stderr);
@@ -583,13 +558,13 @@ class deploy {
 	public function gitx_update($path=null,$branch=null)
 	{
 		if (!$branch) {
-			trigger_error('GIT Branch not specified please provide one');
+			trigger_error('GIT Branch not specified please provide one.');
 		}
 
 		$this->directory_exists($path);
 
 		if (!file_exists($path.'/.git')) {
-			trigger_error('Not a GIT repository '.$path);
+			trigger_error('Not a GIT repository '.$path.'.');
 		} else {
 			$this->v('cd '.$path.';git fetch --all;git reset --hard origin/'.$branch);
 
@@ -629,7 +604,8 @@ class deploy {
 		$this->merge[$name] = $value;
 	}
 
-	public function capture($name,$shell) {
+	public function capture($name,$shell)
+	{
 		$cmd = $this->merge($this->sudo.$shell);
 		$stdout = '';
 		$stderr = '';
@@ -734,15 +710,50 @@ class deploy {
 		$this->file_exists($path,'directory ');
 	}
 
-	public function readline($name,$text)
+	public function readline($name=null,$text=null)
 	{
-		echo $text;
+		if ($text) {
+			echo $text;
+		}
 
 		$handle = fopen("php://stdin","r");
 		$line = fgets($handle);
 		fclose($handle);
 
-		$this->merge[$name] = trim($line);
+		$line = trim($line);
+
+		if ($name) {
+			$this->merge[$name] = $line;
+		}
+
+		return $line;
+	}
+
+	protected function select_option($options,$text=null)
+	{
+		$loop = true;
+
+		while ($loop) {
+			if ($text) {
+				$this->e($text);
+			}
+
+			$this->e('Your choices are.');
+
+			foreach ($options as $o) {
+				$this->e(chr(9).'<cyan>'.$o.'</cyan>');
+			}
+
+			$line = $this->readline();
+
+			if (in_array($line,$options)) {
+				$loop = false;
+			} else {
+				$this->e('<red>'.$line.' not found.</red>');
+			}
+		}
+
+		return $line;
 	}
 
 } /* end class */
