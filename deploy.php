@@ -10,7 +10,7 @@ ini_set('display_errors', 1);
 error_reporting(E_ALL ^ E_NOTICE);
 
 $config = [
-	'version'=>'4.0.9',
+	'version'=>'4.0.10',
 	'deploy_file'=>'deploy.json',
 	'args'=>$_SERVER['argv'],
 	'verbose'=>false,
@@ -187,7 +187,7 @@ class deploy {
 			}
 		}
 	}
-	
+
 	/* single level does not support nesting */
 	public function if()
 	{
@@ -199,7 +199,7 @@ class deploy {
 	{
 		$this->skip = false;
 	}
-	
+
 	/* handle if logic */
 	public function formula($field)
 	{
@@ -207,10 +207,8 @@ class deploy {
 			foreach ($m[1] as $value) {
 				$v = (isset($this->merge[$value])) ? $this->merge[$value] : null;
 
-				if ($v == 'true') {
-					$v = 'true';
-				} elseif ($v == 'false') {	
-					$v = 'false';
+				if ($v == 'true' || $v == 'false') {
+					/* don't wrap */
 				} elseif (is_string($v)) {
 					$v = "'".$v."'";
 				} else {
@@ -221,9 +219,7 @@ class deploy {
 			}
 		}
 
-		$function = 'return ('.$field.');';
-
-		$func = create_function('',$function);
+		$func = create_function('','return ('.$field.');');
 
 		return $func();
 	}
@@ -510,7 +506,7 @@ class deploy {
 	}
 
 	/** add-on commands */
-	
+
 	/* git something... */
 	public function gitx()
 	{
@@ -527,9 +523,9 @@ class deploy {
 
 	/*
 	gitx checkout https://github.com/ProjectOrangeBox/orangev2.git {PWD}/packages/projectorangebox/orange {GITBRANCH}
-	
+
 	clone a specific branch to local folder
-	*/
+	 */
 	public function gitx_checkout($repro_uri=null,$path=null,$branch=null)
 	{
 		if (!$repro_uri) {
@@ -563,17 +559,17 @@ class deploy {
 
 			$this->v($cli);
 
-			$this->e('Checking out '.$use_branch.' '.$path);
-
 			$this->shell($cli);
+
+			$this->gitx_status($path);
 		}
 	}
 
 	/*
 	gitx update {PWD}/packages/projectorangebox/orange
-	
+
 	git fetch and hard reset
-	*/
+	 */
 	public function gitx_update($path=null)
 	{
 		$this->directory_exists($path);
@@ -586,16 +582,16 @@ class deploy {
 			$this->v('cd '.$path.';git fetch --all;git reset --hard origin/'.$branch);
 
 			$this->shell('cd '.$path.';git fetch --all;git reset --hard origin/'.$branch);
-			
+
 			$this->gitx_status($path);
 		}
 	}
 
 	/*
 	gitx status {PWD}/packages/projectorangebox/orange
-	
+
 	read the branch and current commit hash
-	*/
+	 */
 	public function gitx_status($path=null)
 	{
 		$this->directory_exists($path);
