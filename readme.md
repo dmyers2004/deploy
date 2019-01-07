@@ -61,35 +61,33 @@ Example using all options
 
 ## Additional Commands
 
-e - Echo with color `e '<yellow>This is yellow</yellow> this is not'`
+`e` - Echo with color `e '<yellow>This is yellow</yellow> this is not'`
 
-v - Verbose echo with color which is shown only if the verbose option is used. `v 'hello world'`
+`v` - Verbose echo with color which is shown only if the verbose option is used. `v 'hello world'`
 
-heading - Heading `heading 'This is a heading'`
+`heading` - Heading `heading 'This is a heading'`
 
-sub_heading - Heading `sub_heading 'This is a sub heading'`
+`sub_heading` - Heading `sub_heading 'This is a sub heading'`
 
-table_heading - A table heading with column widths.  `table_heading 'First Name' 32 'Last Name' 32 Age 4`
+`import` - Import a file into merge scope. Supported types include array, yaml, json, ini `import array {PWD}\.env`
 
-table_column - A table column with column widths. `table_columns Don 32 Appleseed 32 21 4`
+`gitx update` - Extended git (gitx) command to simplify a git update based on a branch. `gitx update {PWD}/packages/projectorangebox/orange`
 
-import - Import a file into merge scope. Supported types include array, yaml, json, ini `import array {PWD}\.env`
+`gitx status` - Extended git (gitx) command to view the branch of all git repositories. `gitx status {PWD}/packages/projectorangebox/orange`
 
-gitx update - Extended git (gitx) command to simplify a git update based on a branch. `gitx update {PWD}/packages/projectorangebox/orange`
+`gitx checkout` - Extended git (gitx) command to checkout a git repositories. `gitx checkout https://github.com/ProjectOrangeBox/orangev2.git {PWD}/packages/projectorangebox/orange {GITBRANCH}`
 
-gitx status - Extended git (gitx) command to view the branch of all git repositories. `gitx status {PWD}/packages/projectorangebox/orange`
+`set` - Sets a deploy merge variable. `set username 'Johnny Appleseed'`
 
-gitx checkout - Extended git (gitx) command to checkout a git repositories. `gitx checkout https://github.com/ProjectOrangeBox/orangev2.git {PWD}/packages/projectorangebox/orange {GITBRANCH}`
+`capture` - Capture shell script output into a deploy merge variable. `capture variable_name 'date +%F_%T'`
 
-set - Sets a deploy merge variable. `set username 'Johnny Appleseed'`
+`task` - Run another task inside the current task. `task 'repair files'`
 
-capture - Capture shell script output into a deploy merge variable. `capture variable_name 'date +%F_%T'`
+`if ()` - Run a Single Level If statement ie. "if ({PWD} == '123/abc')"
 
-task - Run another task inside the current task. `task 'repair files'`
+`endif` - Exit the Single Level If Statement
 
-if () - Run a Single Level If statement ie. "if ({PWD} == '123/abc')"
-
-endif - Exit the Single Level If Statement
+`true` - test if imported variable exists
 
 
 // Comment. `// do something`
