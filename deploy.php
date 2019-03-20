@@ -23,21 +23,97 @@ exit();
 /* finished */
 
 class deploy {
+	/**
+	 * $sudo
+	 *
+	 * if sudo is set to on this stores the cli prefix "sudo "...
+	 *
+	 * @var string
+	 */
 	public $sudo = '';
+
+	/**
+	 * $merge
+	 *
+	 * The available merge key/value pairs
+	 *
+	 * @var array
+	 */
 	public $merge = [];
+
+	/**
+	 * $deploy_json
+	 *
+	 * Deploys JSON
+	 *
+	 * @var array
+	 */
 	public $deploy_json = [];
+
+	/**
+	 * Store @ switch statement values
+	 *
+	 * true/false
+	 *
+	 * @exit
+	 * @stderr
+	 * @stdout
+	 * @sudo
+	 *
+	 * @var array
+	 */
 	public $switch_storage = [];
+
+	/**
+	 * $config
+	 *
+	 * The configuration
+	 *
+	 * @var array
+	 */
 	public $config = [];
+
+	/**
+	 * $current_task
+	 *
+	 * The current task name
+	 *
+	 * @var null
+	 */
 	public $current_task = null;
+
+	/**
+	 * $current_line
+	 *
+	 * The current line being processed
+	 *
+	 * @var null
+	 */
 	public $current_line = null;
+
+	/**
+	 * $skip
+	 * track if we are in a if () endif
+	 *
+	 * @var boolean
+	 */
 	public $skip = false;
 
+	/**
+	 * __construct
+	 *
+	 * @param mixed $config
+	 * @return void
+	 */
 	public function __construct($config)
 	{
+		/* save the configuration sent in */
 		$this->config = $config;
 
+		/* show the name and current version */
 		$this->heading('Deploy Version '.$this->config['version']);
 
+		/* get the current directory */
 		$dir = getcwd();
 
 		/* move up the folder until we find deploy.json */
@@ -51,12 +127,14 @@ class deploy {
 
 				$this->e($search_path.' <green>√</off>');
 
+				/* change directory this the current directory and leave while loop */
 				chdir($dir);
 				break;
 			}
 
 			$this->e($search_path.' <red>X</off>');
 
+			/* if we make it to root then fail */
 			if (strlen($dir) == 1) {
 				break;
 			}
@@ -64,7 +142,7 @@ class deploy {
 			$dir = dirname($dir);
 		}
 
-		/* capture trigger_error() */
+		/* setup our error handler */
 		set_error_handler(function($errno, $errstr, $errfile, $errline) {
 			if ($errno == 1024) {
 				$this->e('<red>'.str_pad('> '.$errstr.' ',exec('tput cols'),'<',STR_PAD_RIGHT).'</red>');
@@ -84,6 +162,18 @@ class deploy {
 		/* done construct */
 	}
 
+	/**
+	 * options
+	 *
+	 * capture the options
+	 *
+	 * -d directory to search in
+	 * -v verbose
+	 * -d deploy.json to use
+	 *
+	 *
+	 * @return void
+	 */
 	public function options()
 	{
 		/* process arguments */
@@ -94,7 +184,7 @@ class deploy {
 		/* shift off the programs name */
 		array_shift($args);
 
-		/* now handle verbose and file */
+		/* now handle verbose and file and directory */
 		foreach ($args as $idx=>$val) {
 			switch ($val) {
 				/* change the directory */
@@ -136,6 +226,13 @@ class deploy {
 		return $this;
 	}
 
+	/**
+	 * process
+	 *
+	 * process the deploy.json file
+	 *
+	 * @return void
+	 */
 	public function process()
 	{
 		/* get our deploy file */
@@ -156,6 +253,12 @@ class deploy {
 		}
 	}
 
+	/**
+	 * run
+	 *
+	 * @param mixed $command
+	 * @return void
+	 */
 	public function run($command)
 	{
 		/* smart explode (don't break on spaces inside single quotes) */
@@ -164,9 +267,10 @@ class deploy {
 		/* function names since they are php methods/functions can't have dashes */
 		$function = str_replace('-','_',$args[0]);
 
-		/* convert @ to a switch method */
+		/* convert @ to a switch methods */
 		$function = str_replace('@','switch_',$function);
 
+		/* handle comments */
 		if (in_array(substr($command,0,1),['/','%','#'])) {
 			/* it's a comment skip */
 		} elseif (method_exists($this,$function)) {
@@ -188,19 +292,38 @@ class deploy {
 		}
 	}
 
-	/* single level does not support nesting */
+	/**
+	 * if
+	 *
+	 * single level does not support nesting
+	 *
+	 * @return void
+	 */
 	public function if()
 	{
 		$this->skip = !$this->formula(trim(substr($this->current_line,3),'() '));
 	}
 
-	/* single level does not support nesting */
+	/**
+	 * endif
+	 *
+	 * single level does not support nesting
+	 *
+	 * @return void
+	 */
 	public function endif()
 	{
 		$this->skip = false;
 	}
 
-	/* handle if logic */
+	/**
+	 * formula
+	 *
+	 * handle if logic
+	 *
+	 * @param mixed $field
+	 * @return bool
+	 */
 	public function formula($field)
 	{
 		if (preg_match_all("/{([^}]+)}/", $field, $m)) {
@@ -224,25 +347,53 @@ class deploy {
 		return $func();
 	}
 
+	/**
+	 * task_exists
+	 *
+	 * @param mixed $task_name
+	 * @return void
+	 */
 	public function task_exists($task_name)
 	{
 		return (array_key_exists($task_name,$this->deploy_json));
 	}
 
+	/**
+	 * selfupdate
+	 *
+	 * @return void
+	 */
 	public function selfupdate()
 	{
 		$this->self_update();
 	}
 
+	/**
+	 * self_update
+	 *
+	 * @return void
+	 */
 	public function self_update()
 	{
 		$this->heading('Self Updating');
 
+		/**
+		 * remove the temp deploy file if it's there
+		 * git clone the repro to the temp location
+		 * move the temp file over this file
+		 * change file mode to 755 so it can be executed
+		 */
 		exec('rm -fdr /tmp/deploy;git clone https://github.com/dmyers2004/deploy.git /tmp/deploy;mv /tmp/deploy/deploy.php '.__FILE__.';chmod 755 '.__FILE__);
 
 		$this->sub_heading('Complete');
 	}
 
+	/**
+	 * cli
+	 *
+	 * @param mixed $command
+	 * @return void
+	 */
 	public function cli($command)
 	{
 		$exit_code = 0;
@@ -256,6 +407,12 @@ class deploy {
 		return $exit_code;
 	}
 
+	/**
+	 * merge
+	 *
+	 * @param mixed $input
+	 * @return void
+	 */
 	public function merge($input)
 	{
 		/* find all the {???} and make sure we have keys */
@@ -274,6 +431,12 @@ class deploy {
 		return $input;
 	}
 
+	/**
+	 * color
+	 *
+	 * @param mixed $input
+	 * @return void
+	 */
 	public function color($input)
 	{
 		// Set up shell colors
@@ -305,6 +468,11 @@ class deploy {
 		return $input;
 	}
 
+	/**
+	 * get_deploy
+	 *
+	 * @return void
+	 */
 	public function get_deploy()
 	{
 		$array = [];
@@ -324,6 +492,11 @@ class deploy {
 		return (array)$array;
 	}
 
+	/**
+	 * get_hard_actions
+	 *
+	 * @return void
+	 */
 	public function get_hard_actions()
 	{
 		return (array)json_decode('
@@ -340,6 +513,11 @@ class deploy {
 		');
 	}
 
+	/**
+	 * get_help
+	 *
+	 * @return void
+	 */
 	public function get_help()
 	{
 		$rows['aaaaaaaaa'][] = ['Available Tasks:',''];
@@ -375,6 +553,14 @@ class deploy {
 		return $formatted;
 	}
 
+	/**
+	 * shell
+	 *
+	 * @param mixed $cmd
+	 * @param mixed &$stdout=null
+	 * @param mixed &$stderr=null
+	 * @return void
+	 */
 	public function shell($cmd, &$stdout=null, &$stderr=null)
 	{
 		$proc = proc_open($cmd,[
@@ -400,6 +586,12 @@ class deploy {
 	}
 
 	/** table */
+	/**
+	 * table
+	 *
+	 * @param mixed $table
+	 * @return void
+	 */
 	public function table($table)
 	{
 		$extra_pad = 1;
@@ -430,6 +622,12 @@ class deploy {
 		}
 	}
 
+	/**
+	 * table_heading
+	 *
+	 * @param mixed $kv=null
+	 * @return void
+	 */
 	public function table_heading($kv=null)
 	{
 		$kv = ($kv) ? $kv : $this->table_key_value_set(func_get_args());
@@ -441,6 +639,12 @@ class deploy {
 		echo chr(10);
 	}
 
+	/**
+	 * table_columns
+	 *
+	 * @param mixed $kv=null
+	 * @return void
+	 */
 	public function table_columns($kv=null)
 	{
 		$kv = ($kv) ? $kv : $this->table_key_value_set(func_get_args());
@@ -452,6 +656,12 @@ class deploy {
 		echo chr(10);
 	}
 
+	/**
+	 * table_key_value_set
+	 *
+	 * @param mixed $input
+	 * @return void
+	 */
 	public function table_key_value_set($input)
 	{
 		$count = count($input);
@@ -464,6 +674,13 @@ class deploy {
 		return $array;
 	}
 
+	/**
+	 * paddy
+	 *
+	 * @param mixed $input
+	 * @param mixed $width
+	 * @return void
+	 */
 	public function paddy($input,$width)
 	{
 		return $this->color($input).str_repeat(' ',($width - strlen(strip_tags($input))));
@@ -471,6 +688,12 @@ class deploy {
 
 	/** @ switches */
 
+	/**
+	 * switch_sudo
+	 *
+	 * @param mixed $switch='on'
+	 * @return void
+	 */
 	public function switch_sudo($switch='on')
 	{
 		$switch = trim($switch);
@@ -486,6 +709,12 @@ class deploy {
 		$this->sudo = ($switch == 'on') ? 'sudo ' : '';
 	}
 
+	/**
+	 * switch_exit
+	 *
+	 * @param mixed $switch=null
+	 * @return void
+	 */
 	public function switch_exit($switch=null)
 	{
 		$switch = ($switch) ? trim($switch) : null;
@@ -495,11 +724,23 @@ class deploy {
 		exit($switch);
 	}
 
+	/**
+	 * switch_stdout
+	 *
+	 * @param mixed $switch=null
+	 * @return void
+	 */
 	public function switch_stdout($switch=null)
 	{
 		$this->switch_storage['stdout'] = ($switch == 'on') ? true : false;
 	}
 
+	/**
+	 * switch_stderr
+	 *
+	 * @param mixed $switch=null
+	 * @return void
+	 */
 	public function switch_stderr($switch=null)
 	{
 		$this->switch_storage['stderr'] = ($switch == 'on') ? true : false;
@@ -508,6 +749,11 @@ class deploy {
 	/** add-on commands */
 
 	/* git something... */
+	/**
+	 * gitx
+	 *
+	 * @return void
+	 */
 	public function gitx()
 	{
 		$m = __FUNCTION__;
@@ -525,6 +771,14 @@ class deploy {
 	gitx checkout https://github.com/ProjectOrangeBox/orangev2.git {PWD}/packages/projectorangebox/orange {GITBRANCH}
 
 	clone a specific branch to local folder
+	 */
+	/**
+	 * gitx_checkout
+	 *
+	 * @param mixed $repro_uri=null
+	 * @param mixed $path=null
+	 * @param mixed $branch=null
+	 * @return void
 	 */
 	public function gitx_checkout($repro_uri=null,$path=null,$branch=null)
 	{
@@ -570,6 +824,12 @@ class deploy {
 
 	git fetch and hard reset
 	 */
+	/**
+	 * gitx_update
+	 *
+	 * @param mixed $path=null
+	 * @return void
+	 */
 	public function gitx_update($path=null)
 	{
 		$this->directory_exists($path);
@@ -592,6 +852,12 @@ class deploy {
 
 	read the branch and current commit hash
 	 */
+	/**
+	 * gitx_status
+	 *
+	 * @param mixed $path=null
+	 * @return void
+	 */
 	public function gitx_status($path=null)
 	{
 		$this->directory_exists($path);
@@ -607,11 +873,25 @@ class deploy {
 		}
 	}
 
+	/**
+	 * set
+	 *
+	 * @param mixed $name
+	 * @param mixed $value
+	 * @return void
+	 */
 	public function set($name,$value)
 	{
 		$this->merge[$name] = $value;
 	}
 
+	/**
+	 * capture
+	 *
+	 * @param mixed $name
+	 * @param mixed $shell
+	 * @return void
+	 */
 	public function capture($name,$shell)
 	{
 		$cmd = $this->merge($this->sudo.$shell);
@@ -625,6 +905,12 @@ class deploy {
 		return $error_code;
 	}
 
+	/**
+	 * task
+	 *
+	 * @param mixed $task_name
+	 * @return void
+	 */
 	public function task($task_name)
 	{
 		if (!$this->task_exists($task_name)) {
@@ -644,6 +930,13 @@ class deploy {
 		}
 	}
 
+	/**
+	 * import
+	 *
+	 * @param mixed $filetype
+	 * @param mixed $filepath
+	 * @return void
+	 */
 	public function import($filetype,$filepath)
 	{
 		$return = false;
@@ -686,21 +979,45 @@ class deploy {
 		}
 	}
 
+	/**
+	 * heading
+	 *
+	 * @param mixed $txt
+	 * @return void
+	 */
 	public function heading($txt)
 	{
 		$this->e('<cyan>'.str_pad('- '.$txt.' ',exec('tput cols'),'-',STR_PAD_RIGHT).'</cyan>');
 	}
 
+	/**
+	 * sub_heading
+	 *
+	 * @param mixed $txt
+	 * @return void
+	 */
 	public function sub_heading($txt)
 	{
 		$this->e('<blue># '.$txt.'</blue>');
 	}
 
+	/**
+	 * e
+	 *
+	 * @param mixed $txt
+	 * @return void
+	 */
 	public function e($txt)
 	{
 		echo $this->color($txt).chr(10);
 	}
 
+	/**
+	 * v
+	 *
+	 * @param mixed $txt
+	 * @return void
+	 */
 	public function v($txt)
 	{
 		if ($this->config['verbose']) {
@@ -708,6 +1025,13 @@ class deploy {
 		}
 	}
 
+	/**
+	 * file_exists
+	 *
+	 * @param mixed $path
+	 * @param $extra='file '
+	 * @return void
+	 */
 	public function file_exists($path,$extra='file ')
 	{
 		if (!file_exists($path)) {
@@ -715,11 +1039,24 @@ class deploy {
 		}
 	}
 
+	/**
+	 * directory_exists
+	 *
+	 * @param mixed $path
+	 * @return void
+	 */
 	public function directory_exists($path)
 	{
 		$this->file_exists($path,'directory ');
 	}
 
+	/**
+	 * readline
+	 *
+	 * @param mixed $name=null
+	 * @param mixed $text=null
+	 * @return void
+	 */
 	public function readline($name=null,$text=null)
 	{
 		if ($text) {
@@ -739,6 +1076,13 @@ class deploy {
 		return $line;
 	}
 
+	/**
+	 * select_option
+	 *
+	 * @param mixed $options
+	 * @param mixed $text=null
+	 * @return void
+	 */
 	protected function select_option($options,$text=null)
 	{
 		$loop = true;
@@ -766,6 +1110,14 @@ class deploy {
 		return $line;
 	}
 
+	/**
+	 * get_remote_branches
+	 *
+	 * @param mixed $uri
+	 * @param mixed $branch
+	 * @param mixed &$found
+	 * @return void
+	 */
 	protected function get_remote_branches($uri,$branch,&$found)
 	{
 		if (!$uri) {
