@@ -523,18 +523,20 @@ class deploy {
 		$rows['aaaaaaaaa'][] = ['Available Tasks:',''];
 
 		foreach ($this->deploy_json as $key=>$values) {
-			foreach ((array)$values as $value) {
-				if (in_array(substr($value,0,1),['/','%','#'])) {
-					$prefix = substr($value,0,4);
-					$line = trim(substr($value,4));
+			if (!in_array(substr($key,0,1),['/','%','#'])) {
+				foreach ((array)$values as $value) {
+					if (in_array(substr($value,0,1),['/','%','#'])) {
+						$prefix = substr($value,0,4);
+						$line = trim(substr($value,4));
 
-					switch ($prefix) {
-						case '// %':
-							$rows[strtolower($key)][] = ['<green>'.$key.'</green>',$line];
-						break;
-						case '// #':
-							$rows[strtolower($key)][] = [' ',$line];
-						break;
+						switch ($prefix) {
+							case '// %':
+								$rows[strtolower($key)][] = ['<green>'.$key.'</green>',$line];
+							break;
+							case '// #':
+								$rows[strtolower($key)][] = [' ',$line];
+							break;
+						}
 					}
 				}
 			}
