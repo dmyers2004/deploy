@@ -919,7 +919,7 @@ class deploy {
 			trigger_error('Task "'.$task_name.'" Not Found.');
 		}
 
-		$this->sub_heading('Task  '.$task_name);
+		$this->sub_heading('Task  '.trim($task_name));
 
 		$this->current_task = $task_name;
 
