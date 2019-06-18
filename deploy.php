@@ -10,7 +10,7 @@ ini_set('display_errors', 1);
 error_reporting(E_ALL ^ E_NOTICE);
 
 $config = [
-	'version'=>'4.0.11',
+	'version'=>'4.0.12',
 	'deploy_file'=>'deploy.json',
 	'args'=>$_SERVER['argv'],
 	'verbose'=>false,
@@ -301,7 +301,9 @@ class deploy {
 	 */
 	public function if()
 	{
-		$this->skip = !$this->formula(trim(substr($this->current_line,3),'() '));
+		$logic = trim(substr($this->current_line,3),'() ');
+		
+		$this->skip = !$this->formula($logic,$this->merge);
 	}
 
 	/**
@@ -324,29 +326,53 @@ class deploy {
 	 * @param mixed $field
 	 * @return bool
 	 */
-	public function formula($field)
+	public function formula($logic,$arguments,&$function='')
 	{
-		if (preg_match_all("/{([^}]+)}/", $field, $m)) {
-			foreach ($m[1] as $value) {
-				$v = (isset($this->merge[$value])) ? $this->merge[$value] : null;
+		$re = '/{([^}]+)}/'; /* {variable_name} format */
 
-				if ($v == 'true' || $v == 'false') {
-					/* don't wrap */
-				} elseif (is_string($v)) {
-					$v = "'".$v."'";
-				} else {
-					$v = '';
+		/* merge in the other variables */
+		if (preg_match_all($re, $logic, $matches, PREG_SET_ORDER, 0)) {
+			foreach ($matches as $each_match) {
+				$variable = trim($each_match[0],'${} ');
+				
+				/* merge variable not found so bail now returning null and the function will contain the error if you care */
+				if (!array_key_exists($variable,$arguments)) {
+					$function = 'Variable "'.$variable.'" not found.';
+
+					$this->e($function);
+
+					return null;
 				}
 
-				$field = str_replace('{'.$value.'}',$v,$field);
+				$dynamic_value = $arguments[$variable];
+
+				/* if it's truly a boolean then use the string version of the boolean */
+				if (is_bool($dynamic_value)) {
+					$dynamic_value = ($dynamic_value) ? 'true' : 'false';
+				} elseif (is_string($dynamic_value)) {
+					/* if it's a string then we need to wrap it but, only if it's not the string true or false */
+					if ($dynamic_value != 'true' && $dynamic_value != 'false') {
+						$dynamic_value = "'".str_replace("'","\'",$dynamic_value)."'";
+					}
+				}
+
+				$logic = str_replace($each_match[0],$dynamic_value,$logic);
 			}
 		}
 
-		$func = create_function('','return ('.$field.');');
+		/* the logic funciton */
+		$function = 'return('.$logic.');';
 
-		return $func();
+		/* create a closure in it's own box */
+		$closure = eval('return function(){'.$function.'};');
+
+		/* call the closure */
+		$bool = $closure();
+
+		$this->v('Testing: '.$logic.' > '.(($bool) ? '<green>true</off>' : '<red>false</off>'));
+
+		return $bool;
 	}
-
 	/**
 	 * task_exists
 	 *
@@ -884,6 +910,8 @@ class deploy {
 	 */
 	public function set($name,$value)
 	{
+		$this->v('Setting <blue>'.$name.'</off> to <cyan>'.$value.'</off>');
+		
 		$this->merge[$name] = $value;
 	}
 
@@ -926,8 +954,8 @@ class deploy {
 		foreach ($this->deploy_json[$task_name] as $command) {
 			$this->current_line = $command;
 
-			if (!$this->skip) {
-				$exit_code = $this->run($command);
+			if ($this->skip === false || $command == 'endif') {
+				$this->run($command);
 			}
 		}
 	}
