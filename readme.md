@@ -100,6 +100,10 @@ Example using all options
 
 `@exit 1` / `@exit 0` exit deploy script with exit code
 
+`@stdout on` / `@stdout off` - allow standard out to echo to the screen
+
+`@std stderr` / `@std stderr` - allow standard error to echo to the screen
+
 ## Installation
 
 To install deploy you simply checkout the GIT repository and make it executable.
